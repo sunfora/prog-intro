@@ -10,14 +10,12 @@ public class WsppSecondG {
         String ipath = args[0];
         String opath = args[1];
         try {
-            Reader input = new InputStreamReader(new FileInputStream(ipath), "utf8");
+            Split split = new Split(new InputStreamReader(new FileInputStream(ipath), "utf8"), new NewLine(), new NotWord());
             Writer output = new OutputStreamWriter(new FileOutputStream(opath), "utf8");
-            Split split = new Split(input, new NewLine(), new NotWord());
             Split.View lineView = split.view(1);
             Split.View wordView = split.view(2);
             LinkedHashMap<String, IntList> map = new LinkedHashMap<>();
             try {
-                IntList add = new IntList(0, 0);
                 int id = 1;
                 while (lineView.hasNext()) {
                     while (wordView.hasNext()) {
@@ -26,11 +24,7 @@ public class WsppSecondG {
                             continue;
                         }
                         String word = wordView.next().toLowerCase();
-                        IntList idx = map.putIfAbsent(word, add);
-                        if (null == idx) {
-                            idx = map.get(word);
-                            add = new IntList(0, 0);
-                        }
+                        IntList idx = map.computeIfAbsent(word, (key) -> new IntList(0, 0));
                         if (idx.get(-1) % 2 == 1) {
                             idx.append(id);
                             idx.swap(-2, -1);
@@ -60,7 +54,6 @@ public class WsppSecondG {
                     output.write(answer.toString());
                 }
             } finally {
-                input.close();
                 output.close();
                 split.close();
             }
