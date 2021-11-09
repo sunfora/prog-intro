@@ -3,7 +3,7 @@ package markup;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Paragraph implements BBCodeable {
+public class Paragraph implements ListItemType {
 
     private final List<ParagraphElement> elems;
 
@@ -13,6 +13,10 @@ public class Paragraph implements BBCodeable {
             elems.add(var);
         }
     }
+
+    public Paragraph(List<ParagraphElement> vars) {
+    	this((Iterable<ParagraphElement>)vars);
+    }	
 
     public Paragraph(ParagraphElement... vars) {
         this(List.of(vars));

@@ -1,6 +1,6 @@
 package markup;
 
-public class Text implements ParagraphElement, BBCodeable {
+public class Text implements ParagraphElement {
     private final String text;
     public Text(String text) {
         this.text = text;
