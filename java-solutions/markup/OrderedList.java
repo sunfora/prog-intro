@@ -2,16 +2,18 @@ package markup;
 
 import java.util.List;
 
-public class OrderedList extends AbstractBBCodeable implements ListItemType {
-    public OrderedList(Iterable<ListItem> vars) {
-        super(vars, Types.ORDERED_LIST);
-    }
+public class OrderedList extends Tagger implements ListItemType {
+    private final static Tags BBCODE_TAGS = new Tags("[list=1]", "[/list]");
 
     public OrderedList(List<ListItem> vars) {
-        super(vars, Types.ORDERED_LIST);
+        super(vars);
     }
 
-    public OrderedList(ListItem... vars) {
-        super(List.of(vars), Types.ORDERED_LIST);
+    public OrderedList(ListItem var) {
+        super(var);
+    }
+
+    protected Tags getBBCodeTags() {
+        return BBCODE_TAGS;
     }
 }

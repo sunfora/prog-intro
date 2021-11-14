@@ -2,16 +2,24 @@ package markup;
 
 import java.util.List;
 
-public class Emphasis extends AbstractBBCodeable implements ParagraphElement {
-    public Emphasis(Iterable<ParagraphElement> vars) {
-        super(vars, Types.EMPHASIS);
-    }
+public class Emphasis extends MarkdownableTagger implements ParagraphElement {
+
+    private final static Tags MARKDOWN_TAGS = new Tags("*", "*");
+    private final static Tags BBCODE_TAGS = new Tags("[i]", "[/i]");
 
     public Emphasis(List<ParagraphElement> vars) {
-        super(vars, Types.EMPHASIS);
+        super(vars);
     }
 
-    public Emphasis(ParagraphElement... vars) {
-        super(List.of(vars), Types.EMPHASIS);
+    public Emphasis(ParagraphElement var) {
+        super(var);
+    }
+
+    protected Tags getMarkdownTags() {
+        return MARKDOWN_TAGS;
+    }
+
+    protected Tags getBBCodeTags() {
+        return BBCODE_TAGS;
     }
 }

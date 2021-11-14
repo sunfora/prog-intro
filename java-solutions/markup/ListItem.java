@@ -2,16 +2,19 @@ package markup;
 
 import java.util.List;
 
-public class ListItem extends AbstractBBCodeable {
-    public ListItem(Iterable<ListItemType> vars) {
-        super(vars, Types.LIST_ITEM);
-    }
+public class ListItem extends Tagger {
+
+    private final static Tags BBCODE_TAGS = new Tags("[*]", "");
 
     public ListItem(List<ListItemType> vars) {
-        super(vars, Types.LIST_ITEM);
+        super(vars);
     }
 
-    public ListItem(ListItemType... vars) {
-        super(List.of(vars), Types.LIST_ITEM);
+    public ListItem(ListItemType var) {
+        super(var);
+    }
+
+    protected Tags getBBCodeTags() {
+        return BBCODE_TAGS;
     }
 }

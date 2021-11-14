@@ -2,16 +2,24 @@ package markup;
 
 import java.util.List;
 
-public class Strong extends AbstractBBCodeable implements ParagraphElement  {
-    public Strong(Iterable<ParagraphElement> vars) {
-        super(vars, Types.STRONG);
-    }
+public class Strong extends MarkdownableTagger implements ParagraphElement {
+
+    private final static Tags MARKDOWN_TAGS = new Tags("__", "__");
+    private final static Tags BBCODE_TAGS = new Tags("[b]", "[/b]");
 
     public Strong(List<ParagraphElement> vars) {
-        super(vars, Types.STRONG);
+        super(vars);
     }
 
-    public Strong(ParagraphElement... vars) {
-        super(List.of(vars), Types.STRONG);
+    public Strong(ParagraphElement var) {
+        super(var);
+    }
+
+    protected Tags getMarkdownTags() {
+        return MARKDOWN_TAGS;
+    }
+
+    protected Tags getBBCodeTags() {
+        return BBCODE_TAGS;
     }
 }

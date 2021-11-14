@@ -2,29 +2,21 @@ package markup;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 
-public class Paragraph implements ListItemType {
+public class Paragraph implements Markdownable, ListItemType {
 
-    private final List<ParagraphElement> elems;
+    private final List<Markdownable> jars;
 
-    public Paragraph(Iterable<ParagraphElement> vars) {
-        elems = new ArrayList<ParagraphElement>();
-        for (ParagraphElement var : vars) {
-            elems.add(var);
-        }
+    public Paragraph(List<? extends ParagraphElement> jars) {
+        this.jars = new ArrayList<>(jars);
     }
 
-    public Paragraph(List<ParagraphElement> vars) {
-    	this((Iterable<ParagraphElement>)vars);
-    }	
-
-    public Paragraph(ParagraphElement... vars) {
-        this(List.of(vars));
+    public Paragraph(ParagraphElement jar) {
+        this.jars = Collections.singletonList(jar);
     }
 
-    public void toBBCode(StringBuilder dest) {
-        for (ParagraphElement elem : elems) {
-            elem.toBBCode(dest);
-        }
+    public List<Markdownable> getContent() {
+        return Collections.unmodifiableList(jars);
     }
 }

@@ -1,3 +1,3 @@
 package markup;
 
-public interface ParagraphElement extends BBCodeable {}
+public interface ParagraphElement extends Markdownable {}
