@@ -38,7 +38,7 @@ public class Lexer implements Closeable {
 
     private class Tokenizer {
 
-        private static final Token DEFAULT_VALUE = new Token(LexType.NONE);
+        private final Token DEFAULT_VALUE = new Token(LexType.NONE);
         private Token token = DEFAULT_VALUE;
         private ArrayList<Token> rest = new ArrayList<>();
         boolean lock = false;
