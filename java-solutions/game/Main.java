@@ -17,6 +17,7 @@ public class Main {
                } while(!askIfSure(in));
                players.add(new HumanPlayer(in, nick));
            }
+            // :NOTE: Перенести
            Tournament tourn = new Tournament(players);
            for (Pair<Player, Player> pair : tourn) {
                int result = new TwoPlayerGame(

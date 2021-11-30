@@ -19,12 +19,13 @@ public class HumanPlayer implements Player {
 
     @Override
     public Move makeMove(Position position) {
-        Move move = null;
         while (true) {
             System.out.println();
             System.out.println("Current position");
-            System.out.println(position);
+            System.out.println(position); // :NOTE: Лекция
             System.out.println(String.format(Messages.getEnter(), nickname));
+
+            Move move;
             try {
                 move = new Move(in.nextInt(), in.nextInt(), position.getTurn());
             } catch (InputMismatchException e) {
@@ -40,12 +41,10 @@ public class HumanPlayer implements Player {
             }
             if ((null == move) || !position.isValid(move)) {
                 System.out.println(Messages.getIncorrect());
-                move = null;
             } else {
-                break;
+                return move;
             }
         }
-        return move;
     }
 
     public String toString() {

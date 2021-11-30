@@ -9,7 +9,7 @@ public class Tournament implements Iterable<Pair<Player, Player>>, Iterator<Pair
     private final Map<Player, Integer> scores;
     private int gamesPlayed = 0;
 
-    public Tournament(List<Player> players) {
+    public Tournament(final List<Player> players) {
         this.players = List.copyOf(players);
         scores = new HashMap<>();
         games = new ArrayList<>();
