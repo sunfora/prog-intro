@@ -25,7 +25,7 @@ public class Tournament implements Iterable<Pair<Player, Player>>, Iterator<Pair
     }
 
     public boolean hasNext() {
-        return gamesPlayed * 2 != (players.size() * players.size() - 1);
+        return gamesPlayed != games.size();
     }
 
     public Pair<Player, Player> next() {
