@@ -19,6 +19,10 @@ public class Move {
         return col;
     }
 
+    public IntPair getPos() {
+        return new IntPair(col, row);
+    }
+
     public Cell getValue() {
         return value;
     }

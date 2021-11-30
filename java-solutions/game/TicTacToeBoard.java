@@ -1,120 +1,68 @@
 package game;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
-public class TicTacToeBoard implements Board, Position {
+public class TicTacToeBoard extends FieldBoard {
     private static final Map<Cell, String> CELL_TO_STRING = Map.of(
-            Cell.E, ".",
-            Cell.X, "X",
-            Cell.O, "0"
+            Cell.E, "-",
+            Cell.X, "x",
+            Cell.O, "o"
     );
+    private CellField field;
+    private final int k;
+    private final Prettify pretty;
 
-    private final Cell[][] field;
-    private Cell turn;
-
-    public TicTacToeBoard() {
-        field = new Cell[3][3];
-        for (Cell[] row : field) {
-            Arrays.fill(row, Cell.E);
-        }
-        turn = Cell.X;
+    public TicTacToeBoard(int n, int m, int k) {
+        super(new CellField(n, m));
+        this.k = k;
+        field = (CellField) super.field;
+        pretty = new Prettify(field)
+            .grid("ort", " ")
+            .displayUniversal(CELL_TO_STRING)
+            .showAxis(true);
     }
 
     @Override
-    public Cell getTurn() {
-        return turn;
+    protected boolean checkWin(Move move) {
+        return checkAt(move.getCol(), move.getRow());
     }
 
     @Override
-    public Position getPosition() {
-        return this;
-    }
-
-    @Override
-    public GameResult makeMove(Move move) {
-        if (!isValid(move)) {
-            return GameResult.LOOSE;
-        }
-
-        field[move.getRow()][move.getCol()] = move.getValue();
-        if (checkWin()) {
-            return GameResult.WIN;
-        }
-
-        if (checkDraw()) {
-            return GameResult.DRAW;
-        }
-
-        turn = turn == Cell.X ? Cell.O : Cell.X;
-        return GameResult.UNKNOWN;
-    }
-
-    private boolean checkDraw() {
-        int count = 0;
-        for (int r = 0; r < 3; r++) {
-            for (int c = 0; c < 3; c++) {
-                if (field[r][c] == Cell.E) {
-                    count++;
-                }
-            }
-        }
-        if (count == 0) {
-            return true;
-        }
-        return false;
-    }
-
-    private boolean checkWin() {
-        for (int r = 0; r < 3; r++) {
-            int count = 0;
-            for (int c = 0; c < 3; c++) {
-                if (field[r][c] == turn) {
-                    count++;
-                }
-            }
-            if (count == 3) {
-                return true;
-            }
-        }
-        for (int c = 0; c < 3; c++) {
-            int count = 0;
-            for (int r = 0; r < 3; r++) {
-                if (field[r][c] == turn) {
-                    count++;
-                }
-            }
-            if (count == 3) {
-                return true;
-            }
-        }
-        return field[0][0] == turn && field[1][1] == turn && field[2][2] == turn
-                || field[0][2] == turn && field[1][1] == turn && field[2][0] == turn;
-    }
-
-    public boolean isValid(final Move move) {
-        return 0 <= move.getRow() && move.getRow() < 3
-                && 0 <= move.getCol() && move.getCol() < 3
-                && field[move.getRow()][move.getCol()] == Cell.E
-                && turn == move.getValue();
-    }
-
-    @Override
-    public Cell getCell(int row, int column) {
-        return field[row][column];
+    protected boolean checkDraw(Move move) {
+        return field.isFilled();
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder(" 123").append(System.lineSeparator());
-        for (int r = 0; r < 3; r++) {
-            sb.append(r + 1);
-            for (Cell cell : field[r]) {
-                sb.append(CELL_TO_STRING.get(cell));
+        String result = pretty.toString()
+            + System.lineSeparator()
+            + String.format("TicTacToeBoard[turn = %s]", CELL_TO_STRING.get(turn));
+        return result;
+    }
+
+    public boolean checkAt(int i, int j) {
+        return (field.get(i, j) != Cell.E
+                 && (moveAndCount(i, j, 1,  0)
+                 ||  moveAndCount(i, j, 0,  1)
+                 ||  moveAndCount(i, j, 1,  1)
+                 ||  moveAndCount(i, j, 1, -1)));
+    }
+
+    private boolean moveAndCount(int i, int j, int dx, int dy) {
+        int cnt = 1;
+        for (int t = 0; t < 2; ++t) {
+            int m = (t > 0)? -1: 1;
+            int p = 1;
+            while (field.getRangeY().contains(j + p*m*dy)
+                   && field.getRangeX().contains(i + p*m*dx)
+                   && field.get(i, j) == field.get(i + p*m*dx, j + p*m*dy)
+            ) {
+                if (++cnt >= k) {
+                    return true;
+                }
+                ++p;
             }
-            sb.append(System.lineSeparator());
         }
-        sb.setLength(sb.length() - System.lineSeparator().length());
-        return sb.toString();
+        return cnt >= k;
     }
 }
