@@ -1,95 +1,62 @@
 package game;
 
-import java.util.*;
+import java.util.Map;
+import java.io.UncheckedIOException;
+import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
+        InputHandler asker = new InputHandler(System.in, System.out);
         try {
-           System.out.println("Welcome to the Hex tournament!");
-           int cnt = askHowManyPlayers(in);
-           List<Player> players = new ArrayList<>();
-           for (int i : new Range(0, cnt)) {
-               String nick;
-               do {
-                   System.out.println("Player no " + (i+1) + " nickname:");
-                   nick = in.next();
-               } while(!askIfSure(in));
-               players.add(new HumanPlayer(in, nick));
-           }
-            // :NOTE: Перенести
-           Tournament tourn = new Tournament(players);
-           for (Pair<Player, Player> pair : tourn) {
-               int result = new TwoPlayerGame(
-                   new HexBoard(11, 11),
-                   pair.first,
-                   pair.second
-               ).play(false);
-               switch (result) {
-                   case 1:
-                       System.out.println(pair.first + " won");
-                       break;
-                   case 2:
-                       System.out.println(pair.second + " won");
-                       break;
-                   case 0:
-                       System.out.println("Draw");
-                       break;
-                   default:
-                       throw new AssertionError("Unknown result " + result);
-               }
-               tourn.regResult(pair, result);
-           }
-           System.out.println(tourn.getScores());
-        } catch (NoSuchElementException e) {
+            ReadingFunction<Integer> atLeastTwo = new ModifyReading<>(
+                asker::readInt,
+                new Conditional<Integer>(
+                    (new Range(2, Integer.MAX_VALUE))::contains
+                )
+            );
+            Pair<Boolean, Integer> result = asker.askWithAgreement(
+                atLeastTwo,
+                "How many players?",
+                "Input must be an integer with value at least 2"
+            );
+            if (!result.first) {
+                System.out.println("Failed to get players cnt");
+                return;
+            }
 
-        } finally {
-            in.close();
-        }
-    }
+            PlayerRegistrator players = new PlayerRegistrator(System.in, System.out)
+                .askNicknames(true)
+                .setPrettify(
+                    new HexPrettify()
+                        .showAxis(true)
+                        .setWidth(2)
+                        .mapByObject(
+                            Map.of(
+                                Cell.E, "",
+                                Cell.B, "",
+                                Cell.W, ""
+                            )
+                        )
+                );
 
-    public static int askHowManyPlayers(Scanner in) {
-        System.out.println("How many players?");
-        int cnt = -1;
-        while (true) {
             try {
-                cnt = in.nextInt();
-            } catch (InputMismatchException e) {
-                System.out.println("Typed value is not an integer.");
-                continue;
-            } catch (NoSuchElementException e) {
-                System.out.println("Ooops, input is exhausted");
-                throw e;
+                int boardSize = 11;
+                for (int cnt = 0; cnt < result.second; ++cnt) {
+ //                   players.register(new RandomPlayer());
+                    players.registerHuman(String.format("Enter your nickname, player %d", cnt + 1));
+                }
+                Tournament tournament = new HexTournament(boardSize, players.showRegistered(), System.out);
+                tournament.start(true);
+            } catch (UncheckedIOException e) {
+                System.out.println(e.getMessage());
+                throw e.getCause();
             } finally {
-                if (in.hasNextLine()) {
-                    in.nextLine();
-                }
+                players.close();
             }
-            if (cnt <= 1) {
-                System.out.println("At least two players needed");
-            } else {
-                break;
-            }
-        }
-        return cnt;
-    }
-
-    public static boolean askIfSure(Scanner in) {
-        System.out.println("Are you sure? Y/N");
-        try {
-            while (true) {
-                switch (in.next()) {
-                case "Y":
-                    return true;
-                case "N":
-                    return false;
-                default:
-                    continue;
-                }
-            }
-        } catch (NoSuchElementException e) {
-            System.out.println("Oops, input is exhausted");
-            throw e;
+        } catch (IOException e) {
+            System.out.println("IOException occured " + e.getMessage());
+        } finally {
+            asker.close();
         }
     }
 }

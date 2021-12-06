@@ -1,6 +1,7 @@
 package game;
 
 public class TwoPlayerGame {
+
     private final Board board;
     private final Player player1;
     private final Player player2;

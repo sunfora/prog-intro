@@ -2,23 +2,27 @@ package game;
 
 public class SequentialPlayer implements Player {
 
-    private final int n;
-    private final int m;
-
-    public SequentialPlayer(int n, int m) {
-        this.n = n;
-        this.m = m;
-    }
+    private Field last;
+    private int x;
+    private int y;
 
     @Override
     public Move makeMove(Position position) {
-        for (int r = 0; r < n; r++) {
-            for (int c = 0; c < m; c++) {
-                final Move move = new Move(r, c, position.getTurn());
+        if (last != position.getField()) {
+            last = position.getField();
+            x = last.getMinX();
+            y = last.getMinY();
+        }
+        while (last.getRangeY().contains(y)) {
+            while (last.getRangeX().contains(x)) {
+                final Move move = new Move(x, y, position.getTurn());
                 if (position.isValid(move)) {
                     return move;
                 }
+                x++;
             }
+            x = last.getMinX();
+            y++;
         }
         throw new AssertionError("No valid moves");
     }

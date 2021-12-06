@@ -1,94 +1,70 @@
 package game;
 
 import java.util.*;
+import java.io.*;
+import java.util.function.*;
 
+
+// HumanPlayer throws Unchecked IOExceptions
+// Convert them back to IOException if it is possible
 public class HumanPlayer implements Player {
 
     private static int anon = 0;
-    private final Scanner in;
-    private final String nickname;
 
-    public HumanPlayer(Scanner in, String nickname) {
+    private final PrintStream out;
+    private final InputStream in;
+    private final InputHandler asker;
+    private final String nickname;
+    private Position position;
+    private Prettify pretty;
+
+    public HumanPlayer(InputStream in, PrintStream out, String nickname, Prettify pretty) {
+        this.out = Objects.requireNonNull(out);
         this.in = Objects.requireNonNull(in);
         this.nickname = Objects.requireNonNull(nickname);
+        this.pretty = Objects.requireNonNull(pretty);
+        asker = new InputHandler(in, out);
     }
 
-    public HumanPlayer(Scanner in) {
-        this(in, "Unknown_" + ++anon);
+    public HumanPlayer(InputStream in, PrintStream out, Prettify pretty) {
+        this(in, out, "Unknown_Player_" + ++anon, pretty);
     }
 
     @Override
     public Move makeMove(Position position) {
-        while (true) {
-            System.out.println();
-            System.out.println("Current position");
-            System.out.println(position); // :NOTE: Лекция
-            System.out.println(String.format(Messages.getEnter(), nickname));
-
-            Move move;
-            try {
-                move = new Move(in.nextInt(), in.nextInt(), position.getTurn());
-            } catch (InputMismatchException e) {
-                System.out.println(Messages.getBadInput());
-                continue;
-            } catch (NoSuchElementException e) {
-                System.out.println("Ooops, input is exhausted");
-                throw e;
-            } finally {
-                if (in.hasNextLine()) {
-                    in.nextLine();
-                }
+        this.position = position;
+        try {
+            out.println("Current position");
+            out.println(pretty.display(position.getField()));
+            Result<IntPair> result = asker.askWithAgreement(
+                new ModifyReading<>(asker::readIntPair, this::validate),
+                String.format("[Player %s] Enter your move : ", nickname),
+                "Not valid pair or bad move"
+            );
+            if (out.checkError()) {
+                asker.close();
+                throw new UncheckedIOException(new IOException("Print stream got IOException"));
             }
-            if ((null == move) || !position.isValid(move)) {
-                System.out.println(Messages.getIncorrect());
-            } else {
-                return move;
+            if (!result.isValid()) {
+                throw new NoSuchElementException("Porbably input ended");
             }
+            return new Move(result.getValue(), position.getTurn());
+        } catch (IOException e) {
+            asker.close();
+            throw new UncheckedIOException(e);
         }
     }
 
     public String toString() {
         return nickname;
     }
-}
 
-class Messages {
-
-    public static final Random random = new Random();
-
-    public static final String[] WRONG_INPUT = {
-        "Pink Dolphin : Oh, no! These are not even numbers! Or they are rather too big, idk...",
-        "Pink Dolphin : What's that? Ahhghh, once again you missed the buttons",
-        "Pink Dolphin : Oh, come on, type it again...",
-        "Pink Dolphin : Hey, you have these two big white spheres in your head, why don't you use them?",
-        "Pink Dolphin : Letting the days go by, " +
-        "let the water hold me down... Once in a life.. time you will make your move..."
-    };
-
-    public static final String[] ENTER = {
-        ">>> And now is your turn! %s <<<",
-        ">>> What's that? It's your turn! Put something somewhere! <<<",
-        ">>> Welcome back! You play now, %s <<<",
-        ">>> You are not tired yet, %s? Woah! That means it's your turn! <<<"
-    };
-
-    public static final String[] INCORRECT = {
-        "Pink Dolphin : See you later!",
-        "Pink Dolphin : Better luck next time!",
-        "Pink Dolphin : That's not right, try again with another move!",
-        "Pink Dolphin : I like you moving moving, but that's invalid!",
-        "Pink Dolphin : If you are wondering, I like lemon juice!"
-    };
-
-    public static String getEnter() {
-        return ENTER[random.nextInt(ENTER.length)];
-    }
-
-    public static String getIncorrect() {
-        return System.lineSeparator() + INCORRECT[random.nextInt(INCORRECT.length)];
-    }
-
-    public static String getBadInput() {
-        return System.lineSeparator() + WRONG_INPUT[random.nextInt(WRONG_INPUT.length)];
+    private Result<IntPair> validate(Result<IntPair> result) {
+        if (result.isValid()) {
+            if (!position.isValid(new Move(result.getValue(), position.getTurn()))) {
+                result = new Result<>(false, null);
+            }
+        }
+        return result;
     }
 }

@@ -1,26 +1,31 @@
 package game;
 
 public class Move {
-    private final int row;
-    private final int col;
+
+    private final int y;
+    private final int x;
     private final Cell value;
 
-    public Move(int row, int col, Cell value) {
-        this.row = row;
-        this.col = col;
+    public Move(int x, int y, Cell value) {
+        this.y = y;
+        this.x = x;
         this.value = value;
     }
 
-    public int getRow() {
-        return row;
+    public Move(IntPair point, Cell value) {
+        this(point.x, point.y, value);
     }
 
-    public int getCol() {
-        return col;
+    public int getX() {
+        return y;
+    }
+
+    public int getY() {
+        return x;
     }
 
     public IntPair getPos() {
-        return new IntPair(col, row);
+        return new IntPair(x, y);
     }
 
     public Cell getValue() {
@@ -29,6 +34,6 @@ public class Move {
 
     @Override
     public String toString() {
-        return String.format("Move(%s, %d, %d)", value, row + 1, col + 1);
+        return String.format("Move(%s, %d, %d)", value, x, y);
     }
 }

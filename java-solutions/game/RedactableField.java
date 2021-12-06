@@ -1,10 +1,17 @@
 package game;
 
-public interface RedactableField extends Field {
+import java.util.Objects;
 
-    public void set(int x, int y, Cell value);
+/**
+* Field that can be redacted.
+*/
+public interface RedactableField<C> extends Field<C> {
+    // Setter, may not support null values
+    void set(int x, int y, C value);
 
-    default void set(IntPair pos, Cell value) {
+    // Setter for point
+    default void set(IntPair pos, C value) {
+        Objects.requireNonNull(pos);
         set(pos.x, pos.y, value);
     }
 }
