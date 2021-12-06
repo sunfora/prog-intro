@@ -15,8 +15,6 @@ public abstract class AbstractPrettify<T extends AbstractPrettify<T>> implements
     protected int width;
     // Used
     protected static final String WIDTH_FORMAT = "%%%ds";
-    @SuppressWarnings("unchecked")
-    protected final T self = (T) this;
 // fields# /*FOLD00*/
 
 // #constructors: /*FOLD00*/
@@ -33,17 +31,17 @@ public abstract class AbstractPrettify<T extends AbstractPrettify<T>> implements
 // #public: /*FOLD00*/
     public T flipHorizontal() {
         horizontal = (horizontal == false);
-        return self;
+        return self();
     }
 
     public T flipVertical() {
         vertical = (vertical == false);
-        return self;
+        return self();
     }
 
     public T setField(Field<?> field) {
         this.field = field;
-        return self;
+        return self();
     }
 
     public AbstractPrettify showAxis() {
@@ -52,23 +50,23 @@ public abstract class AbstractPrettify<T extends AbstractPrettify<T>> implements
 
     public T showAxis(boolean value) {
         this.axis = value;
-        return self;
+        return self();
     }
 
     public T mapByObject(Map<?, String> map) {
         this.universal = Map.copyOf(map);
-        return self;
+        return self();
     }
 
     public T mapByPoint(Map<IntPair, String> map) {
         this.concrete = Map.copyOf(map);
-        return self;
+        return self();
     }
 
     public T setWidth(int width) {
         assert width >= 0 : "negative width";
         this.width = width;
-        return self;
+        return self();
     }
 
     public String display(Field<?> field) {
@@ -86,12 +84,13 @@ public abstract class AbstractPrettify<T extends AbstractPrettify<T>> implements
         this.horizontal = false;
         this.universal = Map.of();
         this.concrete = Map.of();
-        return self;
+        return self();
     }
 // public# /*FOLD00*/
 
 // #abstract:
     abstract public String display();
+    abstract T self();
 // abstract#
 
 // #protected: /*FOLD00*/

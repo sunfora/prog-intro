@@ -34,6 +34,11 @@ public class HexPrettify extends AbstractPrettify<HexPrettify> {
     }
 
     @Override
+    HexPrettify self() {
+        return this;
+    }
+
+    @Override
     protected boolean getHorizontal() {
         return !super.getHorizontal();
     }
@@ -47,7 +52,7 @@ public class HexPrettify extends AbstractPrettify<HexPrettify> {
     public HexPrettify setToDefault() {
         super.setToDefault();
         this.width = 2;
-        return self;
+        return self();
     }
 // implemented#
 

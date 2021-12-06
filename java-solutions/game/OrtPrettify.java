@@ -27,6 +27,7 @@ public class OrtPrettify extends AbstractPrettify<OrtPrettify> {
 // public#
 
 // #implemented:
+    @Override
     public String display() {
         List<List<String>> cells = createCells();
         IntPair sz = getSizes();
@@ -46,10 +47,14 @@ public class OrtPrettify extends AbstractPrettify<OrtPrettify> {
         return table.toString();
     }
 
+    @Override
     public boolean getVertical() {
         return !super.getVertical();
     }
 
-
+    @Override
+    OrtPrettify self() {
+        return this;
+    }
 // implemented#
 }
