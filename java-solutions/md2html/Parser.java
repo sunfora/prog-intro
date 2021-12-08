@@ -8,7 +8,7 @@ public class Parser implements Closeable {
 
     // Fields
 
-    private Lexer lex;
+    private Tokenizer lex;
     private Tape tape;
     private HTMLable paragraph;
     private boolean locked;
@@ -29,7 +29,7 @@ public class Parser implements Closeable {
     // Constructors
 
     public Parser(Reader source) {
-        lex = new Lexer(source);
+        lex = new Tokenizer(source);
         lastCode = new Integer[4];
         tagStacks = new IntList[4];
         for (int i = 0; i < tagStacks.length; ++i) {
@@ -91,6 +91,7 @@ public class Parser implements Closeable {
             return false;
         }
         tape.add(lex.next());
+        //System.err.println(tape);
         switch (type(tape.back())) {
             case NL:
                 return handleNL();
@@ -206,7 +207,21 @@ public class Parser implements Closeable {
                 Collections.singletonList(constr)
             );
         }
+        checkStacks();
         return true;
+    }
+
+    private void checkStacks() {
+        for (IntList stack : tagStacks) {
+            while (!stack.isEmpty() && stack.get(-1) >= tape.size()) {
+                stack.pop();
+            }
+        }
+        for (int i = 0; i < lastCode.length; ++i) {
+            if (lastCode[i] != null && lastCode[i] >= tape.size()) {
+                lastCode[i] = null;
+            }
+        }
     }
 
     private class Tape extends ArrayList<Box> {
@@ -243,6 +258,9 @@ public class Parser implements Closeable {
         }
 
         public void replace(Range range, Collection<? extends Box> rep) {
+            if (range.empty) {
+                return;
+            }
             rep = new ArrayList<>(rep);
             List<Box> sub = subList(range.inf, range.sup);
             sub.clear();
@@ -315,6 +333,7 @@ public class Parser implements Closeable {
         if (sizes.contains(len(got))) {
             stack.append(tape.size() - 1);
         }
+        checkStacks();
         return true;
     }
 
