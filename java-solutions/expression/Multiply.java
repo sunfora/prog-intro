@@ -20,7 +20,8 @@ final public class Multiply extends BinaryOperation {
         return x.multiply(y);
     }
 
-    protected String getOperation() {
+    @Override
+    public String getOperation() {
         return "*";
     }
 

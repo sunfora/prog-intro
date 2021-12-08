@@ -5,8 +5,8 @@ import java.math.BigInteger;
 final public class Divide extends BinaryOperation {
     public Divide(ToMiniString min1, ToMiniString min2) {
         super(min1, min2);
-        if (min2 instanceof BinaryOperation) {
-            if (getPriority() == ((BinaryOperation) min2).getPriority()) {
+        if (min2 instanceof Operation) {
+            if (getPriority() == ((Operation) min2).getPriority()) {
                 right = true;
             }
         }
@@ -23,7 +23,7 @@ final public class Divide extends BinaryOperation {
     }
 
     @Override
-    protected String getOperation() {
+    public String getOperation() {
         return "/";
     }
 

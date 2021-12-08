@@ -18,7 +18,7 @@ final public class Add extends BinaryOperation {
     }
 
     @Override
-    protected String getOperation() {
+    public String getOperation() {
         return "+";
     }
 

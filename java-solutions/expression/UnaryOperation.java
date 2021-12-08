@@ -1,0 +1,93 @@
+package expression;
+
+import java.math.BigInteger;
+
+public abstract class UnaryOperation extends Operation {
+
+    protected boolean enclose;
+    protected boolean left;
+    protected ToMiniString min;
+
+    public UnaryOperation(ToMiniString min, boolean left) {
+        if (min instanceof Operation) {
+            enclose = -((Operation) min).getPriority() < -getPriority();
+        }
+        this.min = min;
+        this.left = left;
+    }
+
+    protected abstract int apply(int x);
+    protected abstract BigInteger apply(BigInteger x);
+
+    @Override
+    public int evaluate(int x, int y, int z) {
+        if (min instanceof TripleExpression) {
+            return apply(((TripleExpression) min).evaluate(x, y, z));
+        }
+        throw new IllegalStateException(min + " is not a TripleExpression");
+    }
+
+    @Override
+    public BigInteger evaluate(BigInteger x) {
+        if (min instanceof BigIntegerExpression) {
+            return apply(((BigIntegerExpression) min).evaluate(x));
+        }
+        throw new IllegalStateException(min + " is not a BigIntegerExpression");
+    }
+
+    @Override
+    public int evaluate(int x) {
+        if (min instanceof Expression) {
+            return apply(((Expression) min).evaluate(x));
+        }
+        throw new IllegalStateException(min + " is not an Expression");
+    }
+
+    @Override
+    protected void fastToString(StringBuilder sb) {
+        if (left) {
+            sb.append(getOperation());
+        }
+        fastBrackets(true, false, sb, min);
+        if (!left) {
+            sb.append(getOperation());
+        }
+    }
+
+    @Override
+    public void fastToMiniString(StringBuilder sb) {
+        if (left) {
+            sb.append(getOperation());
+            if (!enclose) {
+                sb.append(" ");
+            }
+        }
+        fastBrackets(enclose, true, sb, min);
+        if (!left) {
+            if (!enclose) {
+                sb.append(" ");
+            }
+            sb.append(getOperation());
+        }
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (null == other) {
+            return false;
+        }
+        if (this.getClass() == other.getClass()) {
+            return min.equals(((UnaryOperation) other).min);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return 17 * min.hashCode() + this.getClass().hashCode();
+    }
+
+    public ToMiniString get() {
+        return min;
+    }
+}

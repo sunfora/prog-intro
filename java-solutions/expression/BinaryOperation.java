@@ -3,7 +3,7 @@ package expression;
 import java.util.Objects;
 import java.math.BigInteger;
 
-public abstract class BinaryOperation implements Expression, TripleExpression, BigIntegerExpression {
+public abstract class BinaryOperation extends Operation {
 
     protected ToMiniString min1;
     protected ToMiniString min2;
@@ -13,18 +13,16 @@ public abstract class BinaryOperation implements Expression, TripleExpression, B
 
     protected abstract int apply(int x, int y);
     protected abstract BigInteger apply(BigInteger x, BigInteger y);
-    protected abstract String getOperation();
-    protected abstract int getPriority();
 
     public BinaryOperation(ToMiniString min1, ToMiniString min2) {
         this.min1 = Objects.requireNonNull(min1);
         this.min2 = Objects.requireNonNull(min2);
 
-        if (min1 instanceof BinaryOperation) {
-            left = -((BinaryOperation) min1).getPriority() < -getPriority();
+        if (min1 instanceof Operation) {
+            left = -((Operation) min1).getPriority() < -getPriority();
         }
-        if (min2 instanceof BinaryOperation) {
-            right = -((BinaryOperation) min2).getPriority() < -getPriority();
+        if (min2 instanceof Operation) {
+            right = -((Operation) min2).getPriority() < -getPriority();
         }
     }
 
@@ -71,26 +69,19 @@ public abstract class BinaryOperation implements Expression, TripleExpression, B
     }
 
     @Override
-    public String toString() {
-        return String.format("(%s %s %s)", min1, getOperation(), min2);
+    protected void fastToString(StringBuilder sb) {
+        sb.append("(");
+        fast(false, min1, sb);
+        sb.append(" ").append(getOperation()).append(" ");
+        fast(false, min2, sb);
+        sb.append(")");
     }
 
     @Override
-    public String toMiniString() {
-        StringBuilder result = new StringBuilder();
-        String lFormat = "%s";
-        String rFormat = "%s";
-        String mFormat = " %s ";
-        if (left) {
-            lFormat = "(%s)";
-        }
-        if (right) {
-            rFormat = "(%s)";
-        }
-        return String.format(
-             lFormat + mFormat + rFormat,
-             min1.toMiniString(), getOperation(), min2.toMiniString()
-        );
+    public void fastToMiniString(StringBuilder sb) {
+        fastBrackets(left, true, sb, min1);
+        sb.append(" ").append(getOperation()).append(" ");
+        fastBrackets(right, true, sb, min2);
     }
 
     @Override
@@ -108,5 +99,13 @@ public abstract class BinaryOperation implements Expression, TripleExpression, B
     @Override
     public int hashCode() {
         return (min1.hashCode() * 17 * 17) + (min2.hashCode() * 17) + this.getClass().hashCode();
+    }
+
+    public ToMiniString getLeft() {
+        return min1;
+    }
+
+    public ToMiniString getRight() {
+        return min2;
     }
 }

@@ -5,6 +5,10 @@ import java.math.BigInteger;
 final public class Variable implements Expression, TripleExpression, BigIntegerExpression {
     private final String var;
 
+    public Variable(char var) {
+        this(Character.toString(var));
+    }
+
     public Variable(String var) {
         switch (var.toLowerCase()) {
             case "x":
