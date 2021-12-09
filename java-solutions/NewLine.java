@@ -11,20 +11,10 @@ public class NewLine extends CharMatcher {
             found = false;
             cnt = 0;
         }
-        switch (character) {
-           case '\r':
-           case '\n':
-           case '\f':
-           case '\u000b':
-           case '\u2028':
-           case '\u2029':
-           case '\u0085':
-               found = true;
-               cnt = 1;
+	if (character == System.lineSeparator().charAt(cnt)) {
+            ++cnt;
         }
-        if ('\r' == last && '\n' == character) {
-            cnt++;
-        }
+	found = cnt == System.lineSeparator().length();
         last = character;
     }
     @Override
