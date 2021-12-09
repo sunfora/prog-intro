@@ -40,6 +40,7 @@ public class ReverseHexDec2 {
                 lines[cnt++] = Arrays.copyOf(buffer, cntNums);
                 byLines.next();
             }
+	    System.err.println(cnt);
         } finally {
             split.close();
         }

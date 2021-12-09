@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 import java.io.Closeable;
 
+
 /**
  * Split is a tool to iterate over input as it have been splitted string.
  * Split contains many views, the default (0 view) is just all input.
@@ -16,7 +17,7 @@ import java.io.Closeable;
  * calling split method again will restrict usage of all previous views.
  */
 public class Split implements Closeable {
-    // Fields
+    // Fields /*fold00*/
 
     // Views
     private ArrayList<View> levels = new ArrayList<View>();
@@ -33,30 +34,30 @@ public class Split implements Closeable {
     // Flag indicating Split is closed
     private boolean closed;
 
-    // Constructors
+    // Constructors /*fold00*/
 
     /**
      * Constructs new Split entity from a reader.
      */
-    public Split(Reader source) {
+    public Split(Reader source) { /*fold01*/
         cache = new Cached(source);
-    }
+    } /*fold01*/
 
     /**
      * Constructs new Split entity with views created from delimiters.
      */
-    public Split(Reader source, Matcher... delimiters) {
+    public Split(Reader source, Matcher... delimiters) { /*fold01*/
         this(source);
         into(delimiters);
-    }
+    } /*fold01*/
 
-    // Methods
+    // Methods /*fold00*/
 
     /**
      * Returns a view by its id.
      * If id < 0 then last created view returned.
      */
-    public View view(int id) {
+    public View view(int id) { /*fold01*/
         ensureNotClosed();
         Range idRange = new Range(-levels.size(), levels.size());
         if (!idRange.contains(id)) {
@@ -68,40 +69,40 @@ public class Split implements Closeable {
             id += levels.size();
         }
         return levels.get(id);
-    }
+    } /*fold01*/
 
     /**
      * Returns list view on all views
      */
-    public List<View> views() {
+    public List<View> views() { /*fold01*/
         return Collections.unmodifiableList(levels);
-    }
+    } /*fold01*/
 
     /**
      * Splits into views .
      */
-    public List<View> into(Matcher... delimiters) {
+    public List<View> into(Matcher... delimiters) { /*fold01*/
         ensureNotClosed();
         View level = zero;
         for (Matcher delimiter : delimiters) {
             level = level.split(delimiter);
         }
         return views();
-    }
+    } /*fold01*/
 
     /**
      * Returns current Split depth.
      */
-    public int depth() {
+    public int depth() { /*fold01*/
         ensureNotClosed();
         return levels.size();
-    }
+    } /*fold01*/
 
     /**
      * Closes Split
      */
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException { /*fold01*/
         if (!closed) {
             zero.restrictUsageOfDescendants();
             zero.getRestriction(this);
@@ -113,10 +114,10 @@ public class Split implements Closeable {
                 cache = null;
             }
         }
-    }
+    } /*fold01*/
 
     // Shifts cache, updates state of all views, and returns provided String
-    private String shiftUpdateReturnToken(int caller, Range tokenRange, String token) {
+    private String shiftUpdateReturnToken(int caller, Range tokenRange, String token) { /*fold01*/
         ensureNotClosed();
         cache.shiftStorage(tokenRange.sup);
         int offset = zero.offset;
@@ -145,21 +146,21 @@ public class Split implements Closeable {
             level.pos = Math.max(offset, level.pos - tokenRange.sup);
         }
         return token;
-    }
+    } /*fold01*/
 
     // Makes usage of Split impossible after close
-    private void ensureNotClosed() throws IllegalStateException {
+    private void ensureNotClosed() throws IllegalStateException { /*fold01*/
         if (closed) {
             throw new IllegalStateException("Split is closed");
         }
-    }
+    } /*fold01*/
 
-    // Nested Classes
+    // Nested Classes /*fold00*/
     /* View is Node-like class that is up to iterating over input.
      * It may create new nodes, but now can have only one child and only one parent
      */
-    public class View {
-        // Fields
+    public class View { /*fold01*/
+        // Fields /*fold02*/
         private final int id;
 
         private boolean usageRestricted;
@@ -177,58 +178,58 @@ public class Split implements Closeable {
         private boolean locked;
         private int pos;
 
-        // Constructors
+        // Constructors /*fold02*/
 
         // Constructs view from parent and delimiter
-        private View(Matcher delimiter, View parent) {
+        private View(Matcher delimiter, View parent) { /*fold03*/
             this.delimiter = delimiter.clone();
             this.parent = parent;
             offset = parent.offset;
             pos = offset;
             id = parent.id + 1;
             levels.add(this);
-        }
+        } /*fold03*/
 
         // Constructs default (zero) view
-        private View() {
+        private View() { /*fold03*/
             id = 0;
             offset = 0;
             delimiter = null;
             parent = null;
             levels.add(this);
-        }
+        } /*fold03*/
 
-        // Methods
+        // Methods /*fold02*/
 
         /**
          * Tells whether a next token available
          */
-        public boolean hasNext() throws IOException {
+        public boolean hasNext() throws IOException { /*fold03*/
             ensureNotRestricted();
             return !(locked && tokenRange.empty);
-        }
+        } /*fold03*/
 
         /**
          * Returns next found token
          */
-        public String next() throws IOException {
+        public String next() throws IOException { /*fold03*/
             ensureNotRestricted();
             unlockDescendants();
             return shiftUpdateReturnToken(id, collectToken(), showToken());
-        }
+        } /*fold03*/
 
         /**
          * Returns last found token without moving onto the next position.
          */
-        public String showToken() throws IOException {
+        public String showToken() throws IOException { /*fold03*/
             ensureNotRestricted();
             if (!hasNext()) {
                 throw new NoSuchElementException("No more elements for this view");
             }
             return cache.extract(collectToken());
-        }
+        } /*fold03*/
 
-        // Getters
+        // Getters /*fold03*/
 
         /**
          * Returns parent of this view
@@ -250,23 +251,23 @@ public class Split implements Closeable {
         public int getId() {
             return id;
         }
-        //
+        // /*fold03*/
 
         /**
          * Creates a new view in the scope of vision of this view with
          * specified delimiter.
          */
-        public View split(Matcher delimiter) {
+        public View split(Matcher delimiter) { /*fold03*/
             ensureNotRestricted();
             Objects.requireNonNull(delimiter);
             restrictUsageOfDescendants();
             child = new View(delimiter, this);
             return child;
-        }
+        } /*fold03*/
 
         // Method called by child to detect whether position is in token of
         // a parent
-        private boolean liesInToken(int pos) throws IOException {
+        private boolean liesInToken(int pos) throws IOException { /*fold03*/
             if (id == 0) {
                 return ((cache.length() > pos) || cache.more());
             }
@@ -279,11 +280,11 @@ public class Split implements Closeable {
                 return tokenRange.contains(pos);
             }
             return true;
-        }
+        } /*fold03*/
 
         // Moves position while delimiter can be found
         // If delimiter already was found, nothing happens
-        private void moveWhileSubset() throws IOException {
+        private void moveWhileSubset() throws IOException { /*fold03*/
             Range previous = delRange;
             boolean done = !delRange.empty;
             while (!done && parent.liesInToken(pos)) {
@@ -306,10 +307,10 @@ public class Split implements Closeable {
                     locked = true;
                 }
             }
-        }
+        } /*fold03*/
 
         // Collects token
-        private Range collectToken() throws IOException {
+        private Range collectToken() throws IOException { /*fold03*/
             if (id == 0) {
                 while (cache.more()) {
                     cache.cache(1024);
@@ -321,41 +322,41 @@ public class Split implements Closeable {
                 moveWhileSubset();
             }
             return tokenRange;
-        }
+        } /*fold03*/
 
         // Restricts usage of View after parent's new split
-        private void ensureNotRestricted() throws ConcurrentModificationException {
+        private void ensureNotRestricted() throws ConcurrentModificationException { /*fold03*/
             if (usageRestricted) {
                 throw new ConcurrentModificationException(
                     "Usage restricted by " + restrictionFrom.toString() + " after"
                 );
             }
-        }
+        } /*fold03*/
 
         // Sets restriction for every node below
-        private void restrictUsageOfDescendants() {
+        private void restrictUsageOfDescendants() { /*fold03*/
             View child = this.child;
             levels.subList(id + 1, levels.size()).clear();
             while (null != child) {
                 child.getRestriction(this);
                 child = child.child;
             }
-        }
+        } /*fold03*/
 
-        private void getRestriction(Object from) {
+        private void getRestriction(Object from) { /*fold03*/
             usageRestricted = true;
             restrictionFrom = from;
-        }
+        } /*fold03*/
 
         // Resets and unlocks locked descendants after the next method
-        private void unlockDescendants() {
+        private void unlockDescendants() { /*fold03*/
             View child = this.child;
             while (null != child) {
                 child.locked = false;
                 child.delimiter.reset();
                 child = child.child;
             }
-        }
+        } /*fold03*/
 
-    }
-}
+    } /*fold01*/
+} /*fold00*/
