@@ -121,7 +121,7 @@ public class WordStatInput {
                 words = Arrays.copyOf(words, words.length * 2);
             }
             int ind = wordsCnt - 1;
-            words[ind] = new StringWithInt(input.getNextWord(), ind);
+            words[ind] = new StringWithInt(input.nextWord(), ind);
         }
         return Arrays.copyOf(words, wordsCnt);
     }
