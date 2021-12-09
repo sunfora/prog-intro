@@ -28,7 +28,7 @@ public class IntList implements Cloneable {
      * Constructs new IntList from another IntList
      */
     public IntList(IntList other) {
-        data = Arrays.copyOf(data, data.length);
+        data = Arrays.copyOf(other.data, other.size);
         size = other.size;
     }
 

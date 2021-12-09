@@ -28,7 +28,7 @@ public class Reverse {
 	int sub = 0;
         try {
             while (byLines.hasNext()) {
-		System.err.println(byLines.showToken());
+     		//System.err.println(byLines.showToken());
                 int cntNums = 0;
                 while (nums.hasNext()) {
                     if (cntNums >= buffer.length) {
@@ -72,14 +72,14 @@ public class Reverse {
         int j = start;
         while (m*j < m*end) {
             if (j != start) {
-		System.err.print(" ");
+		//System.err.print(" ");
                 System.out.print(" ");
             }
-	    System.err.print(ints[j]);
+	    //System.err.print(ints[j]);
             System.out.print(ints[j]);
             j += step;
         }
-	System.err.print(System.lineSeparator());
+	//System.err.print(System.lineSeparator());
         System.out.print(System.lineSeparator());
     }
 
