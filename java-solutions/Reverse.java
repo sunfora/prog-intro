@@ -27,6 +27,7 @@ public class Reverse {
         HexDecFilter nums = new HexDecFilter(split.view(2));
         try {
             while (byLines.hasNext()) {
+		System.err.println(byLines.showToken());
                 int cntNums = 0;
                 while (nums.hasNext()) {
                     if (cntNums >= buffer.length) {
@@ -39,7 +40,6 @@ public class Reverse {
                 }
                 lines[cnt++] = Arrays.copyOf(buffer, cntNums);
                 byLines.next();
-	        System.err.println(cnt);
             }
         } finally {
             split.close();
