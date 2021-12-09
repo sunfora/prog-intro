@@ -267,8 +267,7 @@ public class Split implements Closeable {
 
         // Method called by child to detect whether position is in token of
         // a parent
-        private boolean liesInToken(int pos) throws IOException { /*fold03*/
-	    System.err.println("liesInToken " + tokenRange + " at pos = " + pos + " with delRange = " + delRange);
+        private boolean liesInToken(int pos) throws IOException { /*fold03*/	   
             if (id == 0) {
                 return ((cache.length() > pos) || cache.more());
             }
@@ -280,7 +279,7 @@ public class Split implements Closeable {
             if (!tokenRange.empty) {
                 return tokenRange.contains(pos);
             }
-            return true;
+            return pos <= this.pos;
         } /*fold03*/
 
         // Moves position while delimiter can be found
