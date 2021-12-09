@@ -19,7 +19,7 @@ public class Reverse {
         int[][] lines = new int[1][];
         int[] buffer = new int[1];
         Split split = new Split(
-            new InputStreamReader(System.in),
+            new InputStreamReader(System.in, "utf8"),
             new NewLine(),
             new Whitespace()
         );
@@ -72,14 +72,15 @@ public class Reverse {
         int j = start;
         while (m*j < m*end) {
             if (j != start) {
+		System.err.print(" ");
                 System.out.print(" ");
             }
 	    System.err.print(ints[j]);
             System.out.print(ints[j]);
             j += step;
         }
-	System.err.println();
-        System.out.println();
+	System.err.print(System.lineSeparator());
+        System.out.print(System.lineSeparator());
     }
 
     public static void printIntArray(int[] ints, int start, int end) {
