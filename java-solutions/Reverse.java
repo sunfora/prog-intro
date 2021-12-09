@@ -25,6 +25,7 @@ public class Reverse {
         );
         Split.View byLines = split.view(1);
         HexDecFilter nums = new HexDecFilter(split.view(2));
+	int sub = 0;
         try {
             while (byLines.hasNext()) {
 		System.err.println(byLines.showToken());
@@ -40,11 +41,12 @@ public class Reverse {
                 }
                 lines[cnt++] = Arrays.copyOf(buffer, cntNums);
                 byLines.next();
+		sub = cntNums > 0? 0 : 1;
             }
         } finally {
             split.close();
         }
-        return Arrays.copyOf(lines, cnt - 1);
+        return Arrays.copyOf(lines, cnt - sub);
     }
 
 
@@ -72,9 +74,11 @@ public class Reverse {
             if (j != start) {
                 System.out.print(" ");
             }
+	    System.err.print(ints[j]);
             System.out.print(ints[j]);
             j += step;
         }
+	System.err.println();
         System.out.println();
     }
 
