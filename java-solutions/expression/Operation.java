@@ -1,6 +1,9 @@
 package expression;
 
 public abstract class Operation implements Expression, TripleExpression, BigIntegerExpression {
+    protected String cache;
+    protected String cacheMini;
+
     abstract public int getPriority();
     abstract public String getOperation();
     abstract protected void fastToString(StringBuilder dest);
@@ -8,16 +11,22 @@ public abstract class Operation implements Expression, TripleExpression, BigInte
 
     @Override
     public String toString() {
+        if (cache != null) {
+            return cache;
+        }
         StringBuilder sb = new StringBuilder();
         fastToString(sb);
-        return sb.toString();
+        return cache = sb.toString();
     }
 
     @Override
     public String toMiniString() {
+        if (cacheMini != null) {
+            return cacheMini;
+        }
         StringBuilder sb = new StringBuilder();
         fastToMiniString(sb);
-        return sb.toString();
+        return cacheMini = sb.toString();
     }
 
     protected void fastMini(ToMiniString min, StringBuilder sb) {
@@ -42,11 +51,11 @@ public abstract class Operation implements Expression, TripleExpression, BigInte
 
     protected void fastBrackets(boolean add, boolean mini, StringBuilder sb, ToMiniString min) {
         if (add) {
-            sb.append("(");
+            sb.append('(');
         }
         fast(mini, min, sb);
         if (add) {
-            sb.append(")");
+            sb.append(')');
         }
     }
 }
