@@ -24,7 +24,7 @@ public class ReverseHexDec2 {
             new Whitespace()
         );
         Split.View byLines = split.view(1);
-        HexDecFilter nums = new HexDecFilter(split.view(2));
+        HexDecConverter nums = new HexDecConverter(split.view(2));
         try {
             while (byLines.hasNext()) {
                 int cntNums = 0;
@@ -40,7 +40,6 @@ public class ReverseHexDec2 {
                 lines[cnt++] = Arrays.copyOf(buffer, cntNums);
                 byLines.next();
             }
-	    System.err.println(cnt);
         } finally {
             split.close();
         }

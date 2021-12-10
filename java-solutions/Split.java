@@ -179,7 +179,7 @@ public class Split implements Closeable {
         private int pos;
 
 	private boolean nextEmpty;
-
+	private boolean thereWasDelim;
         // Constructors /*fold02*/
 
         // Constructs view from parent and delimiter
@@ -208,7 +208,7 @@ public class Split implements Closeable {
          */
         public boolean hasNext() throws IOException { /*fold03*/
             ensureNotRestricted();
-            return !(locked && tokenRange.empty) || nextEmpty;
+            return !(locked && tokenRange.empty);
         } /*fold03*/
 
         /**
@@ -217,9 +217,11 @@ public class Split implements Closeable {
         public String next() throws IOException { /*fold03*/
             ensureNotRestricted();
             unlockDescendants();
-	    boolean thereWasDelim = !delRange.empty;
+	    thereWasDelim = !delRange.empty;
 	    String result = shiftUpdateReturnToken(id, collectToken(), showToken());
-	    nextEmpty = !hasNext() && thereWasDelim;
+	    if (nextEmpty = (locked && thereWasDelim && !nextEmpty) ) {
+	        tokenRange = new Range(offset, offset);
+	    }
 	    return result;
         } /*fold03*/
 
@@ -334,9 +336,6 @@ public class Split implements Closeable {
                 tokenRange = new Range(0, cache.length());
                 locked = true;
             }
-	    if (nextEmpty && tokenRange.empty) {
-	    	tokenRange = new Range(offset, offset);
-	    }
             while (tokenRange.empty) {
                 moveWhileSubset();
             }

@@ -24,10 +24,9 @@ public class Reverse {
             new Whitespace()
         );
         Split.View byLines = split.view(1);
-        HexDecFilter nums = new HexDecFilter(split.view(2));
+        HexDecConverter nums = new HexDecConverter(split.view(2));
         try {
             while (byLines.hasNext()) {
-     		// System.err.println("`" + byLines.showToken() + "`");
                 int cntNums = 0;
                 while (nums.hasNext()) {
                     if (cntNums >= buffer.length) {
@@ -69,14 +68,11 @@ public class Reverse {
         int j = start;
         while (m*j < m*end) {
             if (j != start) {
-		//System.err.print(" ");
                 System.out.print(" ");
             }
-	    //System.err.print(ints[j]);
             System.out.print(ints[j]);
             j += step;
         }
-	//System.err.print(System.lineSeparator());
         System.out.print(System.lineSeparator());
     }
 
