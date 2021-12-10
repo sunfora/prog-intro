@@ -208,7 +208,7 @@ public class Split implements Closeable {
          */
         public boolean hasNext() throws IOException { /*fold03*/
             ensureNotRestricted();
-            return !(locked && tokenRange.empty);
+            return !(locked && tokenRange.empty) || nextEmpty;
         } /*fold03*/
 
         /**
@@ -217,7 +217,10 @@ public class Split implements Closeable {
         public String next() throws IOException { /*fold03*/
             ensureNotRestricted();
             unlockDescendants();
-	    return shiftUpdateReturnToken(id, collectToken(), showToken());
+	    boolean thereWasDelim = !delRange.empty;
+	    String result = shiftUpdateReturnToken(id, collectToken(), showToken());
+	    nextEmpty = !hasNext() && thereWasDelim;
+	    return result;
         } /*fold03*/
 
         /**
@@ -296,9 +299,10 @@ public class Split implements Closeable {
 		    previous = delRange;
 		}
                 delimiter.send(cache.get(pos++));
-                if (previous.isSubsetOf(matching())) {
+		Range current = matching();
+                if (previous.isSubsetOf(current)) {
                     done = false;
-		    previous = matching();
+		    previous = current;
                     if (delimiter.found()) {
 		    	delRange = previous;
 		    }
@@ -330,8 +334,8 @@ public class Split implements Closeable {
                 tokenRange = new Range(0, cache.length());
                 locked = true;
             }
-	    if (nextEmpty) {
-	    	return new Range(offset, offset);
+	    if (nextEmpty && tokenRange.empty) {
+	    	tokenRange = new Range(offset, offset);
 	    }
             while (tokenRange.empty) {
                 moveWhileSubset();

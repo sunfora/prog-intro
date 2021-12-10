@@ -44,7 +44,7 @@ public class ReverseHexDec2 {
         } finally {
             split.close();
         }
-        return Arrays.copyOf(lines, cnt);
+        return Arrays.copyOf(lines, cnt - 1);
     }
 
 

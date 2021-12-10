@@ -44,7 +44,7 @@ public class Reverse {
         } finally {
             split.close();
         }
-        return Arrays.copyOf(lines, cnt);
+        return Arrays.copyOf(lines, cnt - 1);
     }
 
     public static void printReversed(int[][] parsed) {
