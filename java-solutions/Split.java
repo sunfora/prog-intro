@@ -178,6 +178,8 @@ public class Split implements Closeable {
         private boolean locked;
         private int pos;
 
+	private boolean nextEmpty;
+
         // Constructors /*fold02*/
 
         // Constructs view from parent and delimiter
@@ -206,7 +208,7 @@ public class Split implements Closeable {
          */
         public boolean hasNext() throws IOException { /*fold03*/
             ensureNotRestricted();
-            return !(locked && tokenRange.empty);
+            return !(locked && tokenRange.empty) || nextEmpty;
         } /*fold03*/
 
         /**
@@ -215,7 +217,11 @@ public class Split implements Closeable {
         public String next() throws IOException { /*fold03*/
             ensureNotRestricted();
             unlockDescendants();
-            return shiftUpdateReturnToken(id, collectToken(), showToken());
+	    boolean wasNotEmpty = !delRange.empty;
+	    String result = shiftUpdateReturnToken(id, collectToken(), showToken());
+	    nextEmpty = wasNotEmpty && !hasNext();
+	    //System.err.println(nextEmpty);
+	    return result;
         } /*fold03*/
 
         /**
@@ -226,6 +232,9 @@ public class Split implements Closeable {
             if (!hasNext()) {
                 throw new NoSuchElementException("No more elements for this view");
             }
+	    if (nextEmpty) {
+	    	return "";
+	    }
             return cache.extract(collectToken());
         } /*fold03*/
 
@@ -285,26 +294,24 @@ public class Split implements Closeable {
         // Moves position while delimiter can be found
         // If delimiter already was found, nothing happens
         private void moveWhileSubset() throws IOException { /*fold03*/
-            Range previous = delRange;
+	    Range previous = delRange;
 	    boolean done = !delRange.empty;
 	    while (!done && parent.liesInToken(pos)) {
                 done = true;
 		if (delimiter.found()) {
-		    delRange = new Range(pos - delimiter.matchSize(), pos);
-		    previous = delRange;
+		    delRange = matching();
 		}
                 delimiter.send(cache.get(pos++));
-                Range current = new Range(pos - delimiter.matchSize(), pos);
-                if (current.isSupersetOf(previous)) {
+                if (previous.isSubsetOf(matching())) {
                     done = false;
+		    previous = matching();
                     if (delimiter.found()) {
-		    	delRange = new Range(pos - delimiter.matchSize(), pos);
+		    	delRange = previous;
 		    }
-		    previous = current;
                 }
             }
 	    if (delimiter.found() && delRange.empty) {
-	    	delRange = new Range(pos - delimiter.matchSize(), pos);
+	    	delRange = matching();
 	    }
             // Update tokenRange
             if (!delRange.empty || !parent.liesInToken(pos)) {
@@ -316,15 +323,22 @@ public class Split implements Closeable {
             }
         } /*fold03*/
 
-        // Collects token
-        private Range collectToken() throws IOException { /*fold03*/
-            if (id == 0) {
+        private Range matching() {
+	    return new Range(pos - delimiter.matchSize(), pos);
+	}
+
+	// Collects token
+        private Range collectToken() throws IOException { /*fold03*/            
+	    if (id == 0) {
                 while (cache.more()) {
                     cache.cache(1024);
                 }
                 tokenRange = new Range(0, cache.length());
                 locked = true;
             }
+	    if (nextEmpty) {
+	    	return new Range(offset, offset);
+	    }
             while (tokenRange.empty) {
                 moveWhileSubset();
             }
