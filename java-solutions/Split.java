@@ -293,6 +293,7 @@ public class Split implements Closeable {
                 done = true;
 		if (delimiter.found()) {
 		    delRange = matching();
+		    previous = delRange;
 		}
                 delimiter.send(cache.get(pos++));
                 if (previous.isSubsetOf(matching())) {
