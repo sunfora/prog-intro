@@ -303,11 +303,14 @@ public class Split implements Closeable {
 		    previous = current;
                 }
             }
+	    if (delimiter.found() && delRange.empty) {
+	    	delRange = new Range(pos - delimiter.matchSize(), pos);
+	    }
             // Update tokenRange
             if (!delRange.empty || !parent.liesInToken(pos)) {
                 delRange = (delRange.empty)? new Range(pos, pos) : delRange;
                 tokenRange = new Range(offset, delRange.inf);
-                if (!parent.liesInToken(tokenRange.sup)) {
+                if (!parent.liesInToken(delRange.sup)) {
                     locked = true;
                 }
             }
