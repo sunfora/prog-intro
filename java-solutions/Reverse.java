@@ -28,7 +28,7 @@ public class Reverse {
 	int sub = 0;
         try {
             while (byLines.hasNext()) {
-     		//System.err.println(byLines.showToken());
+     		// System.err.println("`" + byLines.showToken() + "`");
                 int cntNums = 0;
                 while (nums.hasNext()) {
                     if (cntNums >= buffer.length) {

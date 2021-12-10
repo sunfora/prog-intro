@@ -279,23 +279,24 @@ public class Split implements Closeable {
             if (!tokenRange.empty) {
                 return tokenRange.contains(pos);
             }
-            return pos <= this.pos;
+            return pos < this.pos;
         } /*fold03*/
 
         // Moves position while delimiter can be found
         // If delimiter already was found, nothing happens
         private void moveWhileSubset() throws IOException { /*fold03*/
             Range previous = delRange;
-            boolean done = !delRange.empty;
-            while (!done && parent.liesInToken(pos)) {
+	    boolean done = !delRange.empty;
+	    while (!done && parent.liesInToken(pos)) {
                 done = true;
+		if (delimiter.found()) {
+		    delRange = new Range(pos - delimiter.matchSize(), pos);
+		    previous = delRange;
+		}
                 delimiter.send(cache.get(pos++));
                 Range current = new Range(pos - delimiter.matchSize(), pos);
                 if (current.isSupersetOf(previous)) {
                     done = false;
-                    if (delimiter.found()) {
-                        delRange = current;
-                    }
                     previous = current;
                 }
             }
