@@ -297,7 +297,10 @@ public class Split implements Closeable {
                 Range current = new Range(pos - delimiter.matchSize(), pos);
                 if (current.isSupersetOf(previous)) {
                     done = false;
-                    previous = current;
+                    if (delimiter.found()) {
+		    	delRange = new Range(pos - delimiter.matchSize(), pos);
+		    }
+		    previous = current;
                 }
             }
             // Update tokenRange
