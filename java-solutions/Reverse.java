@@ -25,7 +25,6 @@ public class Reverse {
         );
         Split.View byLines = split.view(1);
         HexDecFilter nums = new HexDecFilter(split.view(2));
-	int sub = 0;
         try {
             while (byLines.hasNext()) {
      		// System.err.println("`" + byLines.showToken() + "`");
@@ -41,14 +40,12 @@ public class Reverse {
                 }
                 lines[cnt++] = Arrays.copyOf(buffer, cntNums);
                 byLines.next();
-		sub = cntNums > 0? 0 : 1;
             }
         } finally {
             split.close();
         }
-        return Arrays.copyOf(lines, cnt - sub);
+        return Arrays.copyOf(lines, cnt);
     }
-
 
     public static void printReversed(int[][] parsed) {
         for (int i = parsed.length - 1; i >= 0; i--) {

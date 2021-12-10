@@ -208,7 +208,7 @@ public class Split implements Closeable {
          */
         public boolean hasNext() throws IOException { /*fold03*/
             ensureNotRestricted();
-            return !(locked && tokenRange.empty) || nextEmpty;
+            return !(locked && tokenRange.empty);
         } /*fold03*/
 
         /**
@@ -217,11 +217,7 @@ public class Split implements Closeable {
         public String next() throws IOException { /*fold03*/
             ensureNotRestricted();
             unlockDescendants();
-	    boolean wasNotEmpty = !delRange.empty;
-	    String result = shiftUpdateReturnToken(id, collectToken(), showToken());
-	    nextEmpty = wasNotEmpty && !hasNext();
-	    //System.err.println(nextEmpty);
-	    return result;
+	    return shiftUpdateReturnToken(id, collectToken(), showToken());
         } /*fold03*/
 
         /**
@@ -232,9 +228,6 @@ public class Split implements Closeable {
             if (!hasNext()) {
                 throw new NoSuchElementException("No more elements for this view");
             }
-	    if (nextEmpty) {
-	    	return "";
-	    }
             return cache.extract(collectToken());
         } /*fold03*/
 
