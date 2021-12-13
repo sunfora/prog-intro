@@ -10,19 +10,20 @@ public class WsppSecondG {
         String ipath = args[0];
         String opath = args[1];
         try {
-            Split split = new Split(new InputStreamReader(new FileInputStream(ipath), "utf8"), new NewLine(), new NotWord());
+            TerribleSplit split = new TerribleSplit(new InputStreamReader(new FileInputStream(ipath), "utf8"), new NewLine(), new NotWord());
             Writer output = new OutputStreamWriter(new FileOutputStream(opath), "utf8");
-            Split.View lineView = split.view(1);
-            Split.View wordView = split.view(2);
+            split.setBufferCapacity(100_000);
+            TerribleSplit.View lineView = split.view(1);
+            TerribleSplit.View wordView = split.view(2);
             LinkedHashMap<String, IntList> map = new LinkedHashMap<>();
             try {
                 int id = 1;
                 while (lineView.hasNext()) {
+                    if ("".equals(wordView.showToken())) {
+                        wordView.next();
+                        continue;
+                    }
                     while (wordView.hasNext()) {
-                        if ("".equals(wordView.showToken())) {
-                            wordView.next();
-                            continue;
-                        }
                         String word = wordView.next().toLowerCase();
                         IntList idx = map.computeIfAbsent(word, (key) -> new IntList(0, 0));
                         if (idx.get(-1) % 2 == 1) {
@@ -41,8 +42,6 @@ public class WsppSecondG {
                 // Traverse map and print
                 StringBuilder answer = new StringBuilder();
                 for (Map.Entry<String, IntList> kv : map.entrySet()) {
-                    String word = kv.getKey();
-                    answer.setLength(0);
                     answer.append(kv.getKey());
                     answer.append(" ");
                     IntList idx = kv.getValue();
@@ -51,8 +50,8 @@ public class WsppSecondG {
                         answer.append(idx.get(i));
                         answer.append((i != p)? " " : System.lineSeparator());
                     }
-                    output.write(answer.toString());
                 }
+                output.write(answer.toString());
             } finally {
                 output.close();
                 split.close();

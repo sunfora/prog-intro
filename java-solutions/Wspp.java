@@ -13,7 +13,7 @@ public class Wspp {
             Reader input = new InputStreamReader(new FileInputStream(ipath), "utf8");
             Writer output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(opath), "utf8"));
             TerribleSplit split = new TerribleSplit(input, new NewLine(), new NotWord());
-            split.setBufferCapacity(10000000);
+            split.setBufferCapacity(100_000);
             TerribleSplit.View lineView = split.view(1);
             TerribleSplit.View wordView = split.view(2);
             LinkedHashMap<String, IntList> map = new LinkedHashMap<>();
@@ -47,7 +47,6 @@ public class Wspp {
                 // Traverse map and print
                 StringBuilder answer = new StringBuilder();
                 for (Map.Entry<String, IntList> kv : map.entrySet()) {
-                    String word = kv.getKey();
                     answer.append(kv.getKey());
                     answer.append(" ");
                     IntList idx = kv.getValue();
