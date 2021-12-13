@@ -323,7 +323,7 @@ public class TerribleSplit implements Closeable {
         private Range collectToken() throws IOException { /*fold03*/            
 	    if (id == 0) {
                 while (cache.more()) {
-                    cache.cache(1024);
+                    cache.cache(1);
                 }
                 tokenRange = new Range(0, cache.length());
                 locked = true;

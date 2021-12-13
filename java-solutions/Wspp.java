@@ -47,7 +47,6 @@ public class Wspp {
                 StringBuilder answer = new StringBuilder();
                 for (Map.Entry<String, IntList> kv : map.entrySet()) {
                     String word = kv.getKey();
-                    answer.setLength(0);
                     answer.append(kv.getKey());
                     answer.append(" ");
                     IntList idx = kv.getValue();
@@ -56,8 +55,8 @@ public class Wspp {
                         answer.append(idx.get(i));
                         answer.append((i != p)? " " : System.lineSeparator());
                     }
-                    output.write(answer.toString());
                 }
+                output.write(answer.toString());
             } finally {
                 input.close();
                 output.close();
