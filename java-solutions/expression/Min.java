@@ -3,9 +3,15 @@ package expression;
 import java.math.BigInteger;
 
 public class Min extends BinaryOperation {
-    public Min(ToMiniString min1, ToMiniString min2) {
+    public Min(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
     }
+
+    protected boolean rightAssociativeWith(PolyExpression min) {
+        return min instanceof Min
+            || min instanceof Max; // wtf?
+    }
+
 
     @Override
     public int getPriority() {

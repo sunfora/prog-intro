@@ -5,20 +5,8 @@ import java.math.BigInteger;
 
 public abstract class BinaryOperation extends Operation {
 
-    protected ToMiniString min1;
-    protected ToMiniString min2;
-
-    protected Expression expr1;
-    protected Expression expr2;
-    protected boolean expr;
-
-    protected TripleExpression exprT1;
-    protected TripleExpression exprT2;
-    protected boolean triple;
-
-    protected BigIntegerExpression exprB1;
-    protected BigIntegerExpression exprB2;
-    protected boolean big;
+    protected PolyExpression min1;
+    protected PolyExpression min2;
 
     protected boolean left;
     protected boolean right;
@@ -26,75 +14,45 @@ public abstract class BinaryOperation extends Operation {
     protected abstract int apply(int x, int y);
     protected abstract BigInteger apply(BigInteger x, BigInteger y);
 
-    public BinaryOperation(ToMiniString min1, ToMiniString min2) {
+    public BinaryOperation(PolyExpression min1, PolyExpression min2) {
         this.min1 = Objects.requireNonNull(min1);
         this.min2 = Objects.requireNonNull(min2);
 
         if (min1 instanceof Operation) {
             left = -((Operation) min1).getPriority() < -getPriority();
         }
+
         if (min2 instanceof Operation) {
-            right = -((Operation) min2).getPriority() < -getPriority();
+            right = -((Operation) min2).getPriority() <= -getPriority();
         }
 
-        if (min1 instanceof Expression && min2 instanceof Expression) {
-            expr1 = (Expression) min1;
-            expr2 = (Expression) min2;
-            expr = true;
+        if (rightAssociativeWith(min2)) {
+            right = false;
         }
+    }
 
-        if (min1 instanceof TripleExpression && min2 instanceof TripleExpression) {
-            exprT1 = (TripleExpression) min1;
-            exprT2 = (TripleExpression) min2;
-            triple = true;
-        }
-
-        if (min1 instanceof BigIntegerExpression && min2 instanceof BigIntegerExpression) {
-            exprB1 = (BigIntegerExpression) min1;
-            exprB2 = (BigIntegerExpression) min2;
-            big = true;
-        }
+    protected boolean rightAssociativeWith(PolyExpression min) {
+        return false;
     }
 
     @Override
     public int evaluate(int x) {
-        if (expr) {
-            return apply(expr1.evaluate(x), expr2.evaluate(x));
-        }
-        ToMiniString cause = (min1 instanceof Expression)? min2 : min1;
-        throw new IllegalStateException("Cannot evaluate expression " + cause + " is not Expression");
+        return apply(min1.evaluate(x), min2.evaluate(x));
     }
 
     @Override
     public int evaluate(int x, int y, int z) {
-        if (triple) {
-            return apply(
-                exprT1.evaluate(x, y, z),
-                exprT2.evaluate(x, y, z)
-            );
-        }
-        ToMiniString cause = (min1 instanceof TripleExpression)? min2 : min1;
-        throw new IllegalStateException(
-            "Cannot evaluate expression "
-            + cause
-            + " is not TripleExpression"
+        return apply(
+            min1.evaluate(x, y, z),
+            min2.evaluate(x, y, z)
         );
     }
 
-
     @Override
     public BigInteger evaluate(BigInteger x) {
-        if (big) {
-            return apply(
-                exprB1.evaluate(x),
-                exprB2.evaluate(x)
-            );
-        }
-        ToMiniString cause = (min1 instanceof BigIntegerExpression)? min2 : min1;
-        throw new IllegalStateException(
-             "Cannot evaluate expression "
-             + cause
-             + " is not BigIntegerExpression"
+        return apply(
+            min1.evaluate(x),
+            min2.evaluate(x)
         );
     }
 
@@ -126,16 +84,26 @@ public abstract class BinaryOperation extends Operation {
         return false;
     }
 
+
+    protected boolean hashCached;
+    protected int     hashCache;
+
     @Override
     public int hashCode() {
-        return (min1.hashCode() * 17 * 17) + (min2.hashCode() * 17) + this.getClass().hashCode();
+        if (!hashCached) {
+            hashCached = true;
+            return hashCache = (min1.hashCode() * 17 * 17)
+                                + (min2.hashCode() * 17)
+                                + this.getClass().hashCode();
+        }
+        return hashCache;
     }
 
-    public ToMiniString getLeft() {
+    public PolyExpression getLeft() {
         return min1;
     }
 
-    public ToMiniString getRight() {
+    public PolyExpression getRight() {
         return min2;
     }
 }

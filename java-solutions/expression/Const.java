@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Const implements Expression, TripleExpression, BigIntegerExpression {
+final public class Const implements PolyExpression {
     private final BigInteger value;
 
     public Const(int value) {

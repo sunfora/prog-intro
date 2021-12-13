@@ -4,11 +4,12 @@ import java.math.BigInteger;
 
 final public class Multiply extends BinaryOperation {
 
-    public Multiply(ToMiniString min1, ToMiniString min2) {
+    public Multiply(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
-        if (min2 instanceof Divide) {
-            right = true;
-        }
+    }
+
+    protected boolean rightAssociativeWith(PolyExpression min) {
+        return min instanceof Multiply;
     }
 
     protected int apply(int x, int y) {

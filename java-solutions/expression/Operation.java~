@@ -1,35 +1,23 @@
 package expression;
 
-public abstract class Operation implements PolyExpression {
-
+public abstract class Operation implements Expression, TripleExpression, BigIntegerExpression {
     abstract public int getPriority();
     abstract public String getOperation();
     abstract protected void fastToString(StringBuilder dest);
     abstract protected void fastToMiniString(StringBuilder dest);
 
-
-    protected String cache;
-
     @Override
     public String toString() {
-        if (cache != null) {
-            return cache;
-        }
         StringBuilder sb = new StringBuilder();
         fastToString(sb);
-        return cache = sb.toString();
+        return sb.toString();
     }
-
-    protected String cacheMini;
 
     @Override
     public String toMiniString() {
-        if (cacheMini != null) {
-            return cacheMini;
-        }
         StringBuilder sb = new StringBuilder();
         fastToMiniString(sb);
-        return cacheMini = sb.toString();
+        return sb.toString();
     }
 
     protected void fastMini(ToMiniString min, StringBuilder sb) {
@@ -54,11 +42,11 @@ public abstract class Operation implements PolyExpression {
 
     protected void fastBrackets(boolean add, boolean mini, StringBuilder sb, ToMiniString min) {
         if (add) {
-            sb.append('(');
+            sb.append("(");
         }
         fast(mini, min, sb);
         if (add) {
-            sb.append(')');
+            sb.append(")");
         }
     }
 }
