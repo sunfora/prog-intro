@@ -3,7 +3,7 @@ package md2html;
 import java.util.Arrays;
 
 public class Token {
-
+    private boolean closing;
     private LexType type;
     private StringBuilder buffer = new StringBuilder();
 
@@ -63,5 +63,20 @@ public class Token {
 
     public int length() {
         return buffer.length();
+    }
+
+    public Token closing(boolean value) {
+        closing = value;
+        return this;
+    }
+
+    public String cut(int lb, int rb) {
+        String str = substring(lb, rb);
+        buffer.replace(lb, rb, "");
+        return str;
+    }
+
+    public boolean isClosing() {
+        return closing;
     }
 }

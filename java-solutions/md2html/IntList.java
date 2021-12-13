@@ -30,7 +30,7 @@ public class IntList implements Cloneable {
      * Constructs new IntList from another IntList
      */
     public IntList(IntList other) {
-        data = Arrays.copyOf(data, data.length);
+        data = Arrays.copyOf(other.data, other.data.length);
         size = other.size;
     }
 
@@ -148,9 +148,7 @@ public class IntList implements Cloneable {
      */
     public IntList reverse() {
         for (int i = 0; i < size/2; i++) {
-            int exc = data[i];
-            data[i] = data[size - i - 1];
-            data[size - i - 1] = exc;
+            data[i] = Util.swap(data[size - i - 1], data[size - i - 1] = data[i]);
         }
         return this;
     }
@@ -242,6 +240,10 @@ public class IntList implements Cloneable {
         return Arrays.copyOf(data, size);
     }
 
+    public Integer[] toIntegerArray() {
+        return Util.toIntegerArray(toIntArray());
+    }
+
     /**
      * Returns string representation of IntList
      */
@@ -271,8 +273,16 @@ public class IntList implements Cloneable {
      * is filled with zeroes.
      */
     public IntList resize(int size) {
+        return resize(size, 0);
+    }
+
+    /**
+     * Resizes IntList. If new size is bigger than previous the end
+     * is filled with value.
+     */
+    public IntList resize(int size, int value) {
         manageCapacity(size);
-        Arrays.fill(data, size, data.length, 0);
+        Arrays.fill(data, size, data.length, value);
         this.size = size;
         return this;
     }
