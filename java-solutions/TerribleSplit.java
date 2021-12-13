@@ -288,7 +288,7 @@ public class TerribleSplit implements Closeable {
 	    boolean done = !delRange.empty;
 	    while (!done && parent.liesInToken(pos)) {
                 done = true;
-		if (delimiter.found()) {
+		if (delimiter.matchSize() < 2 && delimiter.found()) {
 		    delRange = matching();
 		    previous = delRange;
 		}

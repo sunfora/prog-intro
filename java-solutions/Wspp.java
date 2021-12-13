@@ -11,7 +11,7 @@ public class Wspp {
         String opath = args[1];
         try {
             Reader input = new InputStreamReader(new FileInputStream(ipath), "utf8");
-            Writer output = new OutputStreamWriter(new FileOutputStream(opath), "utf8");
+            Writer output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(opath), "utf8"));
             TerribleSplit split = new TerribleSplit(input, new NewLine(), new NotWord());
             TerribleSplit.View lineView = split.view(1);
             TerribleSplit.View wordView = split.view(2);
@@ -20,11 +20,10 @@ public class Wspp {
                 IntList add = new IntList(0, 0);
                 int id = 1;
                 while (lineView.hasNext()) {
-                    while (wordView.hasNext()) {
-                        if (wordView.showToken().length() == 0) {
+                    if (wordView.showToken().length() == 0) {
                             wordView.next();
-                            continue;
-                        }
+                    }
+                    while (wordView.hasNext()) {
                         String word = wordView.next().toLowerCase();
                         IntList idx = map.putIfAbsent(word, add);
                         if (null == idx) {
