@@ -224,50 +224,6 @@ public class Parser implements Closeable {
         }
     }
 
-    private class Tape extends ArrayList<Box> {
-        public Tape() {
-            super();
-        }
-
-        public Box back() {
-            return tape.get(tape.size() - 1);
-        }
-
-        public Box pop() {
-            return tape.remove(tape.size() - 1);
-        }
-
-        public void add(Token token) {
-            add(new Box(token, null));
-        }
-
-        public Token getToken(int id) {
-            return get(id).token;
-        }
-
-        public ParagraphElement getTree(int id) {
-            return tree(get(id));
-        }
-
-        public List<ParagraphElement> uncover(Range range) {
-            ArrayList<ParagraphElement> exchange = new ArrayList<>();
-            for (int i = range.inf; i < range.sup; ++i) {
-                exchange.add(getTree(i));
-            }
-            return exchange;
-        }
-
-        public void replace(Range range, Collection<? extends Box> rep) {
-            if (range.empty) {
-                return;
-            }
-            rep = new ArrayList<>(rep);
-            List<Box> sub = subList(range.inf, range.sup);
-            sub.clear();
-            sub.addAll(rep);
-        }
-    }
-
     // Shorthands and implementations
 
     // Returns id of biggest suitable length in lengths list
@@ -368,22 +324,3 @@ public class Parser implements Closeable {
 // Shorthand interface
 interface TreeConstructor<T extends HTMLable>
    extends BiFunction<List<? extends ParagraphElement>, Tags, T> {}
-
-// Pair with token and tree
-class Box {
-    public final Token token;
-    public final ParagraphElement tree;
-
-    public Box(Token token, ParagraphElement tree) {
-        this.token = token;
-        this.tree = tree;
-    }
-
-    public Box(Box box) {
-        this(box.token, box.tree);
-    }
-
-    public String toString() {
-        return token.toString();
-    }
-}

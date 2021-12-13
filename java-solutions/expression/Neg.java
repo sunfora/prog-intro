@@ -2,9 +2,9 @@ package expression;
 
 import java.math.BigInteger;
 
-public class Neg extends UnaryOperation {
-    public Neg(ToMiniString min) {
-        super(min, true);
+public class Neg extends LeftUnaryOperation {
+    public Neg(PolyExpression min) {
+        super(min);
     }
 
     @Override

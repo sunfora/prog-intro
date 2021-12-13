@@ -6,7 +6,7 @@ import java.util.function.*;
 
 public class ExpressionParser implements Parser {
 
-    public TripleExpression parse(final String data) {
+    public PolyExpression parse(final String data) {
 /*         System.err.println("test = `" + data + "`");
         WhiteHate WH = new WhiteHate(new StringSource(data));
          System.err.print("WhiteHate version : `");
@@ -17,27 +17,27 @@ public class ExpressionParser implements Parser {
         return parse(new WhiteHate(new StringSource(data)));
     }
 
-    private TripleExpression parse(final CharSource source) {
+    private PolyExpression parse(final CharSource source) {
         return new ExpressionMaker(source).parse();
     }
 
     private static class ExpressionMaker extends BaseParser {
-        TripleExpression expr;
+        PolyExpression expr;
         Op sign = Op.NONE;
 
         public ExpressionMaker(final CharSource source) {
             super(source);
         }
 
-        public TripleExpression parse() {
-            TripleExpression result = parseExpression();
+        public PolyExpression parse() {
+            PolyExpression result = parseExpression();
             if (eof()) {
                 return result;
             }
             throw error("End of expression expected");
         }
 
-        TripleExpression parseExpression() {
+        PolyExpression parseExpression() {
             return parseP(3);
         }
 
@@ -76,6 +76,12 @@ public class ExpressionParser implements Parser {
                     expect("ax");
                     result = Op.MAX;
                 }
+            } else if (take('t')) {
+                expect('0');
+                result = Op.T0;
+            } else if (take('l')) {
+                expect('0');
+                result = Op.L0;
             } else {
                 result = Op.NONE;
             }
@@ -97,19 +103,19 @@ public class ExpressionParser implements Parser {
             return new Const(new BigInteger(sb.toString()));
         }
 
-        TripleExpression parseP(int priority) {
+        PolyExpression parseP(int priority) {
             if (priority == 0) {
                 return parseP0();
             }
-            TripleExpression result = parseP(priority - 1);
+            PolyExpression result = parseP(priority - 1);
             while (sign.getPriority() == priority) {
                 result = sign.make(result, parseP(priority - 1));
             }
             return result;
         }
 
-        TripleExpression parseP0() {
-            TripleExpression result;
+        PolyExpression parseP0() {
+            PolyExpression result;
             Op unary = Op.NONE;
             take(' ');
             if (take('(')) {
@@ -149,10 +155,12 @@ public class ExpressionParser implements Parser {
         MIN      (Min::new),
         MAX      (Max::new),
         NEG      (Neg::new),
+        T0       (T0::new),
+        L0       (L0::new),
         NONE     ();
 
-        private final BiFunction<ToMiniString, ToMiniString, ? extends Operation> binary;
-        private final Function<ToMiniString, ? extends Operation> unary;
+        private final BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary;
+        private final Function<PolyExpression, ? extends Operation> unary;
         private final Operation example;
 
         private Op() {
@@ -161,13 +169,13 @@ public class ExpressionParser implements Parser {
             this.example = null;
         }
 
-        private Op(BiFunction<ToMiniString, ToMiniString, ? extends Operation> binary) {
+        private Op(BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary) {
             this.binary = binary;
             this.unary = null;
             this.example = binary.apply(new Variable('x'), new Variable('y'));
         }
 
-        private Op(Function<ToMiniString, ? extends Operation> unary) {
+        private Op(Function<PolyExpression, ? extends Operation> unary) {
             this.unary = unary;
             this.binary = null;
             this.example = unary.apply(new Variable('x'));
@@ -181,7 +189,7 @@ public class ExpressionParser implements Parser {
             return example.toString();
         }
 
-        public Operation make(ToMiniString min1, ToMiniString min2) {
+        public Operation make(PolyExpression min1, PolyExpression min2) {
             if (!isBinary()) {
                 throw new IllegalStateException("Not a binary operation");
             }
@@ -202,7 +210,7 @@ public class ExpressionParser implements Parser {
             return example.getOperation();
         }
 
-        public Operation make(ToMiniString min1) {
+        public Operation make(PolyExpression min1) {
             if (!isUnary()) {
                 throw new IllegalStateException("Not an unary operation");
             }

@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Variable implements Expression, TripleExpression, BigIntegerExpression {
+final public class Variable implements PolyExpression {
     private final String var;
 
     public Variable(char var) {

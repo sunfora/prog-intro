@@ -6,9 +6,9 @@ public abstract class UnaryOperation extends Operation {
 
     protected boolean enclose;
     protected boolean left;
-    protected ToMiniString min;
+    protected PolyExpression min;
 
-    public UnaryOperation(ToMiniString min, boolean left) {
+    public UnaryOperation(PolyExpression min, boolean left) {
         if (min instanceof Operation) {
             enclose = -((Operation) min).getPriority() < -getPriority();
         }
@@ -87,7 +87,7 @@ public abstract class UnaryOperation extends Operation {
         return 17 * min.hashCode() + this.getClass().hashCode();
     }
 
-    public ToMiniString get() {
+    public PolyExpression get() {
         return min;
     }
 }

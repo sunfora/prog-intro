@@ -3,8 +3,13 @@ package expression;
 import java.math.BigInteger;
 
 public class Max extends BinaryOperation {
-    public Max(ToMiniString min1, ToMiniString min2) {
+    public Max(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
+    }
+
+    protected boolean rightAssociativeWith(PolyExpression min) {
+        return min instanceof Max
+            || min instanceof Min; // wtf? a min b max c != a min (b max c)
     }
 
     @Override

@@ -1,13 +1,14 @@
 package expression;
 
-public abstract class Operation implements Expression, TripleExpression, BigIntegerExpression {
-    protected String cache;
-    protected String cacheMini;
+public abstract class Operation implements PolyExpression {
 
     abstract public int getPriority();
     abstract public String getOperation();
     abstract protected void fastToString(StringBuilder dest);
     abstract protected void fastToMiniString(StringBuilder dest);
+
+
+    protected String cache;
 
     @Override
     public String toString() {
@@ -18,6 +19,8 @@ public abstract class Operation implements Expression, TripleExpression, BigInte
         fastToString(sb);
         return cache = sb.toString();
     }
+
+    protected String cacheMini;
 
     @Override
     public String toMiniString() {
