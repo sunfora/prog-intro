@@ -19,9 +19,8 @@ public class WsppSecondG {
             try {
                 int id = 1;
                 while (lineView.hasNext()) {
-                    if ("".equals(wordView.showToken())) {
+                    if (wordView.showToken().length() == 0) {
                         wordView.next();
-                        continue;
                     }
                     while (wordView.hasNext()) {
                         String word = wordView.next().toLowerCase();
