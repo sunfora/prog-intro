@@ -12,16 +12,16 @@ public class Wspp {
         try {
             Reader input = new InputStreamReader(new FileInputStream(ipath), "utf8");
             Writer output = new OutputStreamWriter(new FileOutputStream(opath), "utf8");
-            Split split = new Split(input, new NewLine(), new NotWord());
-            Split.View lineView = split.view(1);
-            Split.View wordView = split.view(2);
+            TerribleSplit split = new TerribleSplit(input, new NewLine(), new NotWord());
+            TerribleSplit.View lineView = split.view(1);
+            TerribleSplit.View wordView = split.view(2);
             LinkedHashMap<String, IntList> map = new LinkedHashMap<>();
             try {
                 IntList add = new IntList(0, 0);
                 int id = 1;
                 while (lineView.hasNext()) {
                     while (wordView.hasNext()) {
-                        if ("".equals(wordView.showToken())) {
+                        if (wordView.showToken().length() == 0) {
                             wordView.next();
                             continue;
                         }
