@@ -71,4 +71,7 @@ public class Cached extends StorageReader {
         return buffer.lastch();
     }
 
+    public void setBufferCap(int n) {
+        buffer.setCapacity(n);
+    }
 }

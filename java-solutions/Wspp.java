@@ -13,6 +13,7 @@ public class Wspp {
             Reader input = new InputStreamReader(new FileInputStream(ipath), "utf8");
             Writer output = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(opath), "utf8"));
             TerribleSplit split = new TerribleSplit(input, new NewLine(), new NotWord());
+            split.setBufferCapacity(10000000);
             TerribleSplit.View lineView = split.view(1);
             TerribleSplit.View wordView = split.view(2);
             LinkedHashMap<String, IntList> map = new LinkedHashMap<>();

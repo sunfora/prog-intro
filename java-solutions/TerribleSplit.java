@@ -53,6 +53,10 @@ public class TerribleSplit implements Closeable {
 
     // Methods /*FOLD00*/
 
+    public void setBufferCapacity(int n) {
+        cache.setBufferCap(n);
+    }
+
     /**
      * Returns a view by its id.
      * If id < 0 then last created view returned.
