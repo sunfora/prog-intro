@@ -6,11 +6,11 @@ import java.util.function.*;
 
 public class ExpressionParser implements Parser {
 
-    private final static int MIN_VALUE;
+    private static final int MIN_VALUE;
 
     static {
         int lowest = 0;
-        for (Op op : Op.values()) {
+        for (final Op op : Op.values()) {
             lowest = Math.max(lowest, op.getPriority());
         }
         MIN_VALUE = lowest;
@@ -33,7 +33,7 @@ public class ExpressionParser implements Parser {
         }
 
         public PolyExpression parse() {
-            PolyExpression result = parseExpression();
+            final PolyExpression result = parseExpression();
             if (eof()) {
                 return result;
             }
@@ -45,15 +45,15 @@ public class ExpressionParser implements Parser {
         }
 
         Variable parseVariable() {
-            for (char var : "xyz".toCharArray()) {
-                if (take(var)) {
-                    return new Variable(var);
+            for (final char variable : "xyz".toCharArray()) {
+                if (take(variable)) {
+                    return new Variable(variable);
                 }
             }
             throw error("Not supported variable");
         }
 
-        Operation parseUnary(Op op) {
+        Operation parseUnary(final Op op) {
             if (op.isUnary()) {
                 return op.make(parseP0());
             }
@@ -61,8 +61,8 @@ public class ExpressionParser implements Parser {
         }
 
         Op parseSign() {
-            Op result;
             take(' ');
+            final Op result;
             if (take('*')) {
                 result = Op.MULTIPLY;
             } else if (take('/')) {
@@ -92,8 +92,8 @@ public class ExpressionParser implements Parser {
             return result;
         }
 
-        Const parseConst(boolean minus) {
-            StringBuilder sb = new StringBuilder();
+        Const parseConst(final boolean minus) {
+            final StringBuilder sb = new StringBuilder();
             if (minus) {
                 sb.append('-');
             }
@@ -106,7 +106,7 @@ public class ExpressionParser implements Parser {
             return new Const(new BigInteger(sb.toString()));
         }
 
-        PolyExpression parseP(int priority) {
+        PolyExpression parseP(final int priority) {
             if (priority == 0) {
                 return parseP0();
             }
@@ -118,7 +118,7 @@ public class ExpressionParser implements Parser {
         }
 
         PolyExpression parseP0() {
-            PolyExpression result;
+            final PolyExpression result;
             Op unary = Op.NONE;
             take(' ');
             if (take('(')) {
@@ -172,13 +172,13 @@ public class ExpressionParser implements Parser {
             this.example = null;
         }
 
-        private Op(BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary) {
+        private Op(final BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary) {
             this.binary = binary;
             this.unary = null;
             this.example = binary.apply(new Variable('x'), new Variable('y'));
         }
 
-        private Op(Function<PolyExpression, ? extends Operation> unary) {
+        private Op(final Function<PolyExpression, ? extends Operation> unary) {
             this.unary = unary;
             this.binary = null;
             this.example = unary.apply(new Variable('x'));
@@ -192,7 +192,7 @@ public class ExpressionParser implements Parser {
             return example.toString();
         }
 
-        public Operation make(PolyExpression min1, PolyExpression min2) {
+        public Operation make(final PolyExpression min1, final PolyExpression min2) {
             if (!isBinary()) {
                 throw new IllegalStateException("Not a binary operation");
             }
@@ -213,7 +213,7 @@ public class ExpressionParser implements Parser {
             return example.getOperation();
         }
 
-        public Operation make(PolyExpression min1) {
+        public Operation make(final PolyExpression min1) {
             if (!isUnary()) {
                 throw new IllegalStateException("Not an unary operation");
             }
