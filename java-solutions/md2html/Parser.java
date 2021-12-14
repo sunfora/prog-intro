@@ -14,7 +14,6 @@ public class Parser implements Closeable {
     private boolean locked;
     private boolean closed;
 
-    private Integer[] lastCode;
     private IntList stack;
     // Constsants
 
@@ -29,7 +28,6 @@ public class Parser implements Closeable {
 
     public Parser(Reader source) {
         lex = new Tokenizer(source);
-        lastCode = new Integer[4];
         stack = new IntList();
         tape = new Tape();
     }
@@ -60,7 +58,6 @@ public class Parser implements Closeable {
                 lex.close();
             } finally {
                 lex = null;
-                lastCode = null;
                 tape = null;
                 paragraph = null;
                 closed = true;
@@ -74,7 +71,6 @@ public class Parser implements Closeable {
         paragraph = null;
         tape.clear();
         stack.clear();
-        Arrays.fill(lastCode, null);
         locked = false;
         return throwBack;
     }
@@ -88,12 +84,11 @@ public class Parser implements Closeable {
         switch (type(tape.back())) {
             case NL:
                 return handleNL();
-            case CODE:
-                return handleCode();
             case STAR: case UNDERSCORE: case DASH:
                 if (spaceBefore() && spaceAfter()) {
                     return true;
                 }
+            case CODE:
                 return handleOnStack();
         }
         return true;
@@ -144,40 +139,6 @@ public class Parser implements Closeable {
             locked = true;
         }
         return (!locked);
-    }
-
-    // Handles code cases
-    private boolean handleCode() {
-        int lenc = len(tape.back());
-        Integer lastSame = lastCode[lenc];
-        lastCode[lenc] = tape.size() - 1;
-        if (lastSame != null) {
-            // Create box from existing tokens on tape
-            Box constr = new Box(
-                new Token(),
-                CONSTRUCTORS.get(LexType.CODE).get(lenc).apply(
-                    tape.uncover(new Range(lastSame + 1, tape.size() - 1)),
-                    new Tags(tape.get(lastSame), tape.back())
-                )
-            );
-            // Check whether there are other code tags on tape
-            // If so, set null on their length in linking array
-            for (int i = lastSame; i < tape.size(); ++i) {
-                if (type(tape.get(i)) == LexType.CODE) {
-                    lastCode[len(tape.get(i))] = null;
-                }
-            }
-            // Apply changes
-            tape.replace(
-                new Range(lastSame, tape.size()),
-                Collections.singletonList(constr)
-            );
-        }
-        return true;
-    }
-
-    private void checkStacks() {
-
     }
 
     // Check if there is SPACE before last token on tape
