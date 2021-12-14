@@ -164,14 +164,17 @@ public class Parser implements Closeable {
         );
         int ln = len(tape.get(stack.get(-1)));
         if (ln == len(tape.get(tape.size() - 1)) && (constructors.get(ln) != null)) {
-            tape.replace(new Range(stack.get(-1), tape.size()),
-                         Collections.singletonList(new Box(
-                new Token(),
-                constructors.get(ln).apply(
-                    tape.uncover(new Range(stack.get(-1) + 1, tape.size() - 1)),
-                    new Tags(tape.get(stack.get(-1)), tape.back())
+            tape.replace(
+                new Range(stack.get(-1), tape.size()),
+                Collections.singletonList(
+                    new Box(
+                        new Token(),
+                        constructors.get(ln).apply(
+                            tape.uncover(new Range(stack.get(-1) + 1, tape.size() - 1)),
+                            new Tags(tape.get(stack.get(-1)), tape.back())
+                        )
+                    )
                 )
-            ))
             );
             stack.pop();
         } else {
