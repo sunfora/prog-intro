@@ -84,7 +84,6 @@ public abstract class BinaryOperation extends Operation {
         return false;
     }
 
-
     protected boolean hashCached;
     protected int     hashCache;
 

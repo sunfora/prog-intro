@@ -21,26 +21,17 @@ public abstract class UnaryOperation extends Operation {
 
     @Override
     public int evaluate(int x, int y, int z) {
-        if (min instanceof TripleExpression) {
-            return apply(((TripleExpression) min).evaluate(x, y, z));
-        }
-        throw new IllegalStateException(min + " is not a TripleExpression");
+        return apply(min.evaluate(x, y, z));
     }
 
     @Override
     public BigInteger evaluate(BigInteger x) {
-        if (min instanceof BigIntegerExpression) {
-            return apply(((BigIntegerExpression) min).evaluate(x));
-        }
-        throw new IllegalStateException(min + " is not a BigIntegerExpression");
+        return apply(min.evaluate(x));
     }
 
     @Override
     public int evaluate(int x) {
-        if (min instanceof Expression) {
-            return apply(((Expression) min).evaluate(x));
-        }
-        throw new IllegalStateException(min + " is not an Expression");
+        return apply(min.evaluate(x));
     }
 
     @Override
