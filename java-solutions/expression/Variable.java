@@ -10,16 +10,7 @@ final public class Variable implements PolyExpression {
     }
 
     public Variable(String var) {
-        switch (var.toLowerCase()) {
-            case "x":
-            case "y":
-            case "z":
-                this.var = var;
-                break;
-            default:
-                throw new IllegalArgumentException("Not supported Variable");
-        }
-
+        this.var = var;
     }
 
     @Override

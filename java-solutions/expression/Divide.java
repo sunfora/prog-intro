@@ -3,6 +3,8 @@ package expression;
 import java.math.BigInteger;
 
 final public class Divide extends BinaryOperation {
+    private final String op = "/";
+
     public Divide(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
     }
@@ -19,12 +21,27 @@ final public class Divide extends BinaryOperation {
 
     @Override
     public String getOperation() {
-        return "/";
+        return op;
     }
 
     @Override
     public int getPriority() {
         return 1;
+    }
+
+    @Override
+    public boolean rightAssociative() {
+        return false;
+    }
+
+    @Override
+    public boolean selfAssociative() {
+        return false;
+    }
+
+    @Override
+    public boolean leftAssociative() {
+        return false;
     }
 
 }

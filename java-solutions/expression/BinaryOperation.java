@@ -5,8 +5,8 @@ import java.math.BigInteger;
 
 public abstract class BinaryOperation extends Operation {
 
-    protected PolyExpression min1;
-    protected PolyExpression min2;
+    protected final PolyExpression min1;
+    protected final PolyExpression min2;
 
     protected boolean left;
     protected boolean right;
@@ -23,16 +23,17 @@ public abstract class BinaryOperation extends Operation {
         }
 
         if (min2 instanceof Operation) {
-            right = -((Operation) min2).getPriority() <= -getPriority();
-        }
+            int p1 = -((Operation) min2).getPriority();
+            int p2 = -getPriority();
 
-        if (rightAssociativeWith(min2)) {
-            right = false;
-        }
-    }
+            right = p1 < p2; //default
 
-    protected boolean rightAssociativeWith(PolyExpression min) {
-        return false;
+            if (min2.getClass() == this.getClass()) {
+                right = !selfAssociative();
+            } else if (p1 == p2) {
+                right = !rightAssociative() || !((Operation) min2).leftAssociative();
+            }
+        }
     }
 
     @Override
@@ -84,18 +85,10 @@ public abstract class BinaryOperation extends Operation {
         return false;
     }
 
-    protected boolean hashCached;
-    protected int     hashCache;
-
     @Override
     public int hashCode() {
-        if (!hashCached) {
-            hashCached = true;
-            return hashCache = (min1.hashCode() * 17 * 17)
-                                + (min2.hashCode() * 17)
-                                + this.getClass().hashCode();
-        }
-        return hashCache;
+        return (min1.hashCode() * 17 * 17) + (min2.hashCode() * 17) + this.getClass().hashCode();
+
     }
 
     public PolyExpression getLeft() {

@@ -3,12 +3,10 @@ package expression;
 import java.math.BigInteger;
 
 final public class Add extends BinaryOperation {
+    private static final String op = "+";
+
     public Add(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
-    }
-
-    protected boolean rightAssociativeWith(PolyExpression min) {
-        return (min instanceof Add || min instanceof Subtract);
     }
 
     @Override
@@ -23,7 +21,7 @@ final public class Add extends BinaryOperation {
 
     @Override
     public String getOperation() {
-        return "+";
+        return op;
     }
 
     @Override

@@ -3,6 +3,8 @@ package expression;
 import java.math.BigInteger;
 
 final public class Subtract extends BinaryOperation {
+    private final static String op = "-";
+
     public Subtract(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
     }
@@ -19,7 +21,7 @@ final public class Subtract extends BinaryOperation {
 
     @Override
     public String getOperation() {
-        return "-";
+        return op;
     }
 
     @Override
@@ -27,4 +29,13 @@ final public class Subtract extends BinaryOperation {
         return 2;
     }
 
+    @Override
+    public boolean selfAssociative() {
+        return false;
+    }
+
+    @Override
+    public boolean rightAssociative() {
+        return false;
+    }
 }

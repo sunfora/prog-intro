@@ -7,29 +7,30 @@ public abstract class Operation implements PolyExpression {
     abstract protected void fastToString(StringBuilder dest);
     abstract protected void fastToMiniString(StringBuilder dest);
 
+    protected boolean leftAssociative() {
+        return true;
+    }
 
-    protected String cache;
+    protected boolean rightAssociative() {
+        return true;
+    }
+
+    protected boolean selfAssociative() {
+        return true;
+    }
 
     @Override
     public String toString() {
-        if (cache != null) {
-            return cache;
-        }
         StringBuilder sb = new StringBuilder();
         fastToString(sb);
-        return cache = sb.toString();
+        return sb.toString();
     }
-
-    protected String cacheMini;
 
     @Override
     public String toMiniString() {
-        if (cacheMini != null) {
-            return cacheMini;
-        }
         StringBuilder sb = new StringBuilder();
         fastToMiniString(sb);
-        return cacheMini = sb.toString();
+        return sb.toString();
     }
 
     protected void fastMini(ToMiniString min, StringBuilder sb) {

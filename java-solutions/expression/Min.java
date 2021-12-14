@@ -7,12 +7,6 @@ public class Min extends BinaryOperation {
         super(min1, min2);
     }
 
-    protected boolean rightAssociativeWith(PolyExpression min) {
-        return min instanceof Min
-            || min instanceof Max; // wtf?
-    }
-
-
     @Override
     public int getPriority() {
         return 3;

@@ -3,13 +3,10 @@ package expression;
 import java.math.BigInteger;
 
 final public class Multiply extends BinaryOperation {
+    private final static String op = "*";
 
     public Multiply(PolyExpression min1, PolyExpression min2) {
         super(min1, min2);
-    }
-
-    protected boolean rightAssociativeWith(PolyExpression min) {
-        return min instanceof Multiply;
     }
 
     protected int apply(int x, int y) {
@@ -23,7 +20,7 @@ final public class Multiply extends BinaryOperation {
 
     @Override
     public String getOperation() {
-        return "*";
+        return op;
     }
 
     @Override
