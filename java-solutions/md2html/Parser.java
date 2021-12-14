@@ -15,15 +15,14 @@ public class Parser implements Closeable {
     private boolean closed;
 
     private Integer[] lastCode;
-    private IntList[] tagStacks;
-
+    private IntList stack;
     // Constsants
 
-    private static final Map<LexType, List<TreeConstructor<ParagraphElement>>> CONSTRUCTORS = Map.of(
-        LexType.DASH, List.of(Strikeout::new),
-        LexType.CODE, List.of(Code::new, Pre::new),
-        LexType.STAR, List.of(Emphasis::new, Strong::new),
-        LexType.UNDERSCORE, List.of(Emphasis::new, Strong::new)
+    private static final Map<LexType, Map<Integer, TreeConstructor<ParagraphElement>>> CONSTRUCTORS = Map.of(
+        LexType.DASH, Map.of(2, Strikeout::new),
+        LexType.CODE, Map.of(1, Code::new, 3, Pre::new),
+        LexType.STAR, Map.of(1, Emphasis::new, 2, Strong::new),
+        LexType.UNDERSCORE, Map.of(1, Emphasis::new, 2, Strong::new)
     );
 
     // Constructors
@@ -31,10 +30,7 @@ public class Parser implements Closeable {
     public Parser(Reader source) {
         lex = new Tokenizer(source);
         lastCode = new Integer[4];
-        tagStacks = new IntList[4];
-        for (int i = 0; i < tagStacks.length; ++i) {
-            tagStacks[i] = new IntList();
-        }
+        stack = new IntList();
         tape = new Tape();
     }
 
@@ -64,7 +60,6 @@ public class Parser implements Closeable {
                 lex.close();
             } finally {
                 lex = null;
-                tagStacks = null;
                 lastCode = null;
                 tape = null;
                 paragraph = null;
@@ -78,9 +73,7 @@ public class Parser implements Closeable {
     private HTMLable prepare(HTMLable throwBack) {
         paragraph = null;
         tape.clear();
-        for (IntList t : tagStacks) {
-            t.clear();
-        }
+        stack.clear();
         Arrays.fill(lastCode, null);
         locked = false;
         return throwBack;
@@ -97,12 +90,11 @@ public class Parser implements Closeable {
                 return handleNL();
             case CODE:
                 return handleCode();
-            case STAR: case UNDERSCORE:
-                return handleEmphOrStr();
-            case DASH:
-                return handleStrike();
-            case SPACE:
-                return handleSpace();
+            case STAR: case UNDERSCORE: case DASH:
+                if (spaceBefore() && spaceAfter()) {
+                    return true;
+                }
+                return handleOnStack();
         }
         return true;
     }
@@ -154,32 +146,6 @@ public class Parser implements Closeable {
         return (!locked);
     }
 
-    // Handles space tokens
-    // (if backing token on tape is ** or __ or -- it removes them from stack)
-    private boolean handleSpace() {
-        if (tape.size() > 1) {
-            int id = tape.size() - 2;
-            switch (type(tape.get(id))) {
-                case STAR: case UNDERSCORE: case DASH:
-                    IntList stack = tagStacks[type(tape.get(id)).ordinal()];
-                    if (!stack.isEmpty()) {
-                        stack.pop();
-                    }
-            }
-        }
-        return true;
-    }
-
-    // Handles Strong and Emphasis cases
-    private boolean handleEmphOrStr() {
-        return handleOnStack(new IntList(1, 2), CONSTRUCTORS.get(type(tape.back())));
-    }
-
-    // Handles Strikout cases
-    private boolean handleStrike() {
-        return handleOnStack(new IntList(2), CONSTRUCTORS.get(type(tape.back())));
-    }
-
     // Handles code cases
     private boolean handleCode() {
         int lenc = len(tape.back());
@@ -189,7 +155,7 @@ public class Parser implements Closeable {
             // Create box from existing tokens on tape
             Box constr = new Box(
                 new Token(),
-                CONSTRUCTORS.get(LexType.CODE).get((lenc < 3)? 0: 1).apply(
+                CONSTRUCTORS.get(LexType.CODE).get(lenc).apply(
                     tape.uncover(new Range(lastSame + 1, tape.size() - 1)),
                     new Tags(tape.get(lastSame), tape.back())
                 )
@@ -207,89 +173,49 @@ public class Parser implements Closeable {
                 Collections.singletonList(constr)
             );
         }
-        checkStacks();
         return true;
     }
 
     private void checkStacks() {
-        for (IntList stack : tagStacks) {
-            while (!stack.isEmpty() && stack.get(-1) >= tape.size()) {
-                stack.pop();
-            }
-        }
-        for (int i = 0; i < lastCode.length; ++i) {
-            if (lastCode[i] != null && lastCode[i] >= tape.size()) {
-                lastCode[i] = null;
-            }
-        }
-    }
 
-    // Shorthands and implementations
-
-    // Returns id of biggest suitable length in lengths list
-    private Integer getLenId(int size, IntList lengths) {
-        for (int i = -1; i >= -lengths.size(); --i) {
-            if (lengths.get(i) <= size) {
-                return lengths.size() + i;
-            }
-        }
-        return null;
     }
 
     // Check if there is SPACE before last token on tape
     private boolean spaceBefore() {
-        return (type(tape.get(tape.size() - 2)) == LexType.SPACE);
+        return tape.size() >= 1 && (type(tape.get(tape.size() - 1)) == LexType.SPACE);
+    }
+
+    private boolean spaceAfter() throws IOException {
+        return lex.hasNext() && type(lex.showToken()) == LexType.SPACE;
     }
 
     // Big function to handle tokens on stack
-    private boolean handleOnStack(IntList lengths, List<TreeConstructor<ParagraphElement>> constructors) {
-        Token got = tape.back().token;
-        IntList stack = tagStacks[type(got).ordinal()];
-        Range sizes = new Range(lengths.get(0), lengths.get(-1) + 1);
-        // Check if token can be interpreted as anything valid
-        if (!sizes.contains(len(got))) {
-            return true;
-        }
-        // Append token if it is in no possible way is closing
-        if (stack.isEmpty() || spaceBefore()) {
-            stack.append(tape.size() - 1);
-            return true;
-        }
-        // Get last valid token before
-        int idOfLast = stack.get(-1);
-        Token last = tape.getToken(idOfLast);
-        int size = Math.min(len(got), len(last));
-        int del = 0;
-        // Iteratively apply fitting constructors
-        while (sizes.contains(size - del)) {
-            int id = getLenId(size, lengths);
-            int t = lengths.get(id);
-            del += t;
-            String raw = got.substring(0, t);
-            tape.replace(
-                new Range(idOfLast + 1, tape.size() - 1),
-                Collections.singletonList(
-                    new Box(
-                        new Token(),
-                        constructors.get(id).apply(
-                            tape.uncover(new Range(idOfLast + 1, tape.size() - 1)),
-                            new Tags(raw, raw)
-                        )
-                    )
-                )
-            );
-        }
-        // Reset opening and closing tokens
-        got.setLength(len(got) - del);
-        last.setLength(len(last) - del);
-        // Check which token remains in stack
-        if (len(last) == 0) {
+    private boolean handleOnStack() {
+        while (!stack.isEmpty() && (stack.get(-1) > (tape.size() - 1))) {
             stack.pop();
         }
-        if (sizes.contains(len(got))) {
+        if (stack.isEmpty() || type(tape.get(stack.get(-1))) != type(tape.get(tape.size() - 1))) {
+            stack.append(tape.size() - 1);
+            return true;
+        }
+        Map<Integer, TreeConstructor<ParagraphElement>> constructors = CONSTRUCTORS.get(
+            type(tape.get(stack.get(-1)))
+        );
+        int ln = len(tape.get(stack.get(-1)));
+        if (ln == len(tape.get(tape.size() - 1)) && (constructors.get(ln) != null)) {
+            tape.replace(new Range(stack.get(-1), tape.size()),
+                         Collections.singletonList(new Box(
+                new Token(),
+                constructors.get(ln).apply(
+                    tape.uncover(new Range(stack.get(-1) + 1, tape.size() - 1)),
+                    new Tags(tape.get(stack.get(-1)), tape.back())
+                )
+            ))
+            );
+            stack.pop();
+        } else {
             stack.append(tape.size() - 1);
         }
-        checkStacks();
         return true;
     }
 
