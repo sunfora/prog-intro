@@ -6,14 +6,17 @@ import java.util.function.*;
 
 public class ExpressionParser implements Parser {
 
-    public PolyExpression parse(final String data) {
-/*         System.err.println("test = `" + data + "`");
-        WhiteHate WH = new WhiteHate(new StringSource(data));
-         System.err.print("WhiteHate version : `");
-        while (WH.hasNext()) {
-             System.err.print(WH.next());
+    private final static int MIN_VALUE;
+
+    static {
+        int lowest = 0;
+        for (Op op : Op.values()) {
+            lowest = Math.max(lowest, op.getPriority());
         }
-         System.err.println("`");                          */
+        MIN_VALUE = lowest;
+    }
+
+    public PolyExpression parse(final String data) {
         return parse(new WhiteHate(new StringSource(data)));
     }
 
@@ -38,7 +41,7 @@ public class ExpressionParser implements Parser {
         }
 
         PolyExpression parseExpression() {
-            return parseP(3);
+            return parseP(MIN_VALUE);
         }
 
         Variable parseVariable() {
