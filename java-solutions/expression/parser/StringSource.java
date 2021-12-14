@@ -22,7 +22,7 @@ public class StringSource implements CharSource {
     }
 
     @Override
-    public IllegalArgumentException error(final String message) {
-        return new IllegalArgumentException(pos + ": " + message);
+    public int pos() {
+        return pos;
     }
 }

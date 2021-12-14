@@ -47,8 +47,12 @@ public class BaseParser {
         return take(END);
     }
 
+    protected int pos() {
+        return source.pos();
+    }
+
     protected IllegalArgumentException error(final String message) {
-        return source.error(message);
+        return new IllegalArgumentException(source.pos() + ": " + message);
     }
 
     protected boolean between(final char from, final char to) {
