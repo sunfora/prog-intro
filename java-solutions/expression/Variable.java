@@ -3,19 +3,19 @@ package expression;
 import java.math.BigInteger;
 
 final public class Variable implements PolyExpression {
-    private final String var;
+    private final String variable;
 
-    public Variable(char var) {
-        this(Character.toString(var));
+    public Variable(char variable) {
+        this(Character.toString(variable));
     }
 
-    public Variable(String var) {
-        this.var = var;
+    public Variable(String variable) {
+        this.variable = variable;
     }
 
     @Override
     public BigInteger evaluate(BigInteger x) {
-        if (var == "x") {
+        if (variable == "x") {
             return x;
         }
         throw notEvaluated();
@@ -23,7 +23,7 @@ final public class Variable implements PolyExpression {
 
     @Override
     public int evaluate(int x) {
-        if (var == "x") {
+        if (variable == "x") {
             return x;
         }
         throw notEvaluated();
@@ -31,7 +31,7 @@ final public class Variable implements PolyExpression {
 
     @Override
     public int evaluate(int x, int y, int z) {
-        switch (var) {
+        switch (variable) {
             case "x":
                 return x;
             case "y":
@@ -44,12 +44,17 @@ final public class Variable implements PolyExpression {
     }
 
     private IllegalStateException notEvaluated() {
-        return new IllegalStateException("Variable" + var + " is not evaluated");
+        return new IllegalStateException("Variable" + variable + " is not evaluated");
+    }
+
+    @Override
+    public int getPriority() {
+        return 0;
     }
 
     @Override
     public String toString() {
-        return var;
+        return variable;
     }
 
     @Override
@@ -58,15 +63,25 @@ final public class Variable implements PolyExpression {
     }
 
     @Override
+    public void fastToMiniString(StringBuilder sb) {
+        sb.append(variable);
+    }
+
+    @Override
+    public void fastToString(StringBuilder sb) {
+        sb.append(variable);
+    }
+
+    @Override
     public boolean equals(Object other) {
         if (other instanceof Variable) {
-            return var.equals(((Variable) other).var);
+            return variable.equals(((Variable) other).variable);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return var.hashCode();
+        return variable.hashCode();
     }
 }

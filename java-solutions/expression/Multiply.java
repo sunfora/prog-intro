@@ -27,4 +27,13 @@ final public class Multiply extends BinaryOperation {
     public int getPriority() {
         return 1;
     }
+
+    public boolean leftToRight() {
+        return true;
+    }
+
+    @Override
+    public boolean rightAssociative() {
+        return true;
+    }
 }

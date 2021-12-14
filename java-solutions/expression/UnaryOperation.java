@@ -35,11 +35,13 @@ public abstract class UnaryOperation extends Operation {
     }
 
     @Override
-    protected void fastToString(StringBuilder sb) {
+    public void fastToString(StringBuilder sb) {
         if (left) {
             sb.append(getOperation());
         }
-        fastBrackets(true, false, sb, min);
+        sb.append('(');
+        min.fastToString(sb);
+        sb.append(')');
         if (!left) {
             sb.append(getOperation());
         }
@@ -53,7 +55,7 @@ public abstract class UnaryOperation extends Operation {
                 sb.append(" ");
             }
         }
-        fastBrackets(enclose, true, sb, min);
+        fastBrackets(enclose, sb, min);
         if (!left) {
             if (!enclose) {
                 sb.append(" ");

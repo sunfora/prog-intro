@@ -29,6 +29,11 @@ final public class Const implements PolyExpression {
     }
 
     @Override
+    public int getPriority() {
+        return 0;
+    }
+
+    @Override
     public String toString() {
         return value.toString();
     }
@@ -36,6 +41,16 @@ final public class Const implements PolyExpression {
     @Override
     public String toMiniString() {
         return value.toString();
+    }
+
+    @Override
+    public void fastToMiniString(StringBuilder sb) {
+        sb.append(value);
+    }
+
+    @Override
+    public void fastToString(StringBuilder sb) {
+        sb.append(value);
     }
 
     @Override

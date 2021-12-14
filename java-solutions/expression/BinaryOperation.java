@@ -15,23 +15,17 @@ public abstract class BinaryOperation extends Operation {
     protected abstract BigInteger apply(BigInteger x, BigInteger y);
 
     public BinaryOperation(PolyExpression min1, PolyExpression min2) {
-        this.min1 = Objects.requireNonNull(min1);
-        this.min2 = Objects.requireNonNull(min2);
-
-        if (min1 instanceof Operation) {
-            left = -((Operation) min1).getPriority() < -getPriority();
-        }
+        this.min1 = min1;
+        this.min2 = min2;
+        left = -min1.getPriority() < -getPriority();
+        right = -getPriority() > -min2.getPriority();
 
         if (min2 instanceof Operation) {
-            int p1 = -((Operation) min2).getPriority();
-            int p2 = -getPriority();
-
-            right = p1 < p2; //default
-
-            if (min2.getClass() == this.getClass()) {
-                right = !selfAssociative();
-            } else if (p1 == p2) {
-                right = !rightAssociative() || !((Operation) min2).leftAssociative();
+            Operation op2 = (Operation) min2;
+            int p1 = op2.getPriority();
+            int p2 = getPriority();
+            if (p1 == p2) {
+                right = !rightAssociative() || (!op2.leftAssociative());
             }
         }
     }
@@ -58,19 +52,19 @@ public abstract class BinaryOperation extends Operation {
     }
 
     @Override
-    protected void fastToString(StringBuilder sb) {
+    public void fastToString(StringBuilder sb) {
         sb.append('(');
-        fast(false, min1, sb);
-        sb.append(' ').append(getOperation()).append(' ');
-        fast(false, min2, sb);
+        min1.fastToString(sb);
+        sb.append(" " + getOperation() + " ");
+        min2.fastToString(sb);
         sb.append(')');
     }
 
     @Override
     public void fastToMiniString(StringBuilder sb) {
-        fastBrackets(left, true, sb, min1);
-        sb.append(' ').append(getOperation()).append(' ');
-        fastBrackets(right, true, sb, min2);
+        fastBrackets(left, sb, min1);
+        sb.append(" " + getOperation() + " ");
+        fastBrackets(right, sb, min2);
     }
 
     @Override

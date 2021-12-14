@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Subtract extends BinaryOperation {
+public class Subtract extends BinaryOperation {
     private final static String op = "-";
 
     public Subtract(PolyExpression min1, PolyExpression min2) {
@@ -30,12 +30,7 @@ final public class Subtract extends BinaryOperation {
     }
 
     @Override
-    public boolean selfAssociative() {
-        return false;
-    }
-
-    @Override
-    public boolean rightAssociative() {
+    protected boolean rightAssociative() {
         return false;
     }
 }

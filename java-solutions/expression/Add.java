@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Add extends BinaryOperation {
+public class Add extends BinaryOperation {
     private static final String op = "+";
 
     public Add(PolyExpression min1, PolyExpression min2) {

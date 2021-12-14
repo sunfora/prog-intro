@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Divide extends BinaryOperation {
+public class Divide extends BinaryOperation {
     private final String op = "/";
 
     public Divide(PolyExpression min1, PolyExpression min2) {
@@ -30,18 +30,12 @@ final public class Divide extends BinaryOperation {
     }
 
     @Override
-    public boolean rightAssociative() {
-        return false;
-    }
-
-    @Override
-    public boolean selfAssociative() {
-        return false;
-    }
-
-    @Override
     public boolean leftAssociative() {
         return false;
     }
 
+    @Override
+    public boolean rightAssociative() {
+        return false;
+    }
 }
