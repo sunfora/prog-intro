@@ -35,7 +35,7 @@ public class WhiteHate implements CharSource {
     }
 
     @Override
-    public IllegalArgumentException error(final String message) {
-        return source.error(message);
+    public int pos() {
+        return source.pos();
     }
 }
