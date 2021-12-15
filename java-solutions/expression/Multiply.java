@@ -2,7 +2,7 @@ package expression;
 
 import java.math.BigInteger;
 
-final public class Multiply extends BinaryOperation {
+public class Multiply extends BinaryOperation {
     private final static String op = "*";
 
     public Multiply(PolyExpression min1, PolyExpression min2) {
@@ -26,14 +26,5 @@ final public class Multiply extends BinaryOperation {
     @Override
     public int getPriority() {
         return 1;
-    }
-
-    public boolean leftToRight() {
-        return true;
-    }
-
-    @Override
-    public boolean rightAssociative() {
-        return true;
     }
 }

@@ -28,5 +28,4 @@ public class Add extends BinaryOperation {
     public int getPriority() {
         return 2;
     }
-
 }
