@@ -34,6 +34,11 @@ public class Token {
         return type;
     }
 
+    public Token setType(LexType type) {
+        this.type = type;
+        return this;
+    }
+
     public void append(char c) {
         if (type == LexType.NONE) {
             throw new IllegalStateException("Token of type None can't consume chars");

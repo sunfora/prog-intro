@@ -72,7 +72,7 @@ public class Tokenizer implements Closeable {
                 return token;
             }
             if (asText) {
-                return new Token(token.toString());
+                return token.setType(LexType.TEXT);
             }
             return token;
         }
