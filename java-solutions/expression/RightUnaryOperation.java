@@ -6,7 +6,7 @@ abstract public class RightUnaryOperation extends UnaryOperation {
     }
 
     @Override
-    protected boolean isLeftAssociative() {
+    protected boolean leftAssociative() {
         return false;
     }
 }
