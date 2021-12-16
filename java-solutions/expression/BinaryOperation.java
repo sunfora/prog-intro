@@ -23,7 +23,7 @@ public abstract class BinaryOperation extends Operation {
         if (min2 instanceof Operation) {
             Operation op2 = (Operation) min2;
             if (op2.getPriority() == getPriority()) {
-                right = !rightAssociative() || (!op2.leftAssociative());
+                right = !rightAssociative() || !op2.leftAssociative();
             }
         }
     }

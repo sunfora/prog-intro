@@ -9,8 +9,12 @@ public abstract class UnaryOperation extends Operation {
     protected PolyExpression min;
 
     public UnaryOperation(PolyExpression min, boolean left) {
+        enclose = -min.getPriority() < -getPriority();
         if (min instanceof Operation) {
-            enclose = -((Operation) min).getPriority() < -getPriority();
+            Operation op = (Operation) min;
+            if (op.getPriority() == getPriority()) {
+                enclose = !op.leftAssociative();
+            }
         }
         this.min = min;
         this.left = left;
