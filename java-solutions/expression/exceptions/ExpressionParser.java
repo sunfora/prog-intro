@@ -47,8 +47,7 @@ public class ExpressionParser implements Parser {
             super(source);
         }
 
-        public PolyExpression parse() throws
-            EndExpectedException,
+        public PolyExpression parse() throws EndExpectedException,
             ExpectedSymbolException,
             ConstOverflowException,
             OperandNotFoundException,
@@ -66,9 +65,8 @@ public class ExpressionParser implements Parser {
             throw new EndExpectedException(pos(), " end of expression expected");
         }
 
-        PolyExpression parseExpression() throws
+        PolyExpression parseExpression() throws OperandNotFoundException,
             ExpectedSymbolException,
-            OperandNotFoundException,
             ConstOverflowException,
             NotAnOperationException
         {
@@ -90,9 +88,8 @@ public class ExpressionParser implements Parser {
             }
         }
 
-        PolyExpression parseP(int priority) throws
+        PolyExpression parseP(int priority) throws OperandNotFoundException,
             ExpectedSymbolException,
-            OperandNotFoundException,
             ConstOverflowException,
             NotAnOperationException
         {
@@ -116,9 +113,8 @@ public class ExpressionParser implements Parser {
             return result;
         }
 
-        PolyExpression parseP0() throws
+        PolyExpression parseP0() throws OperandNotFoundException,
             ExpectedSymbolException,
-            OperandNotFoundException,
             ConstOverflowException,
             NotAnOperationException
         {
@@ -162,8 +158,7 @@ public class ExpressionParser implements Parser {
             throw new OperandNotFoundException(pos(), "variable not found");
         }
 
-        Operation parseUnary(Op op) throws
-            OperandNotFoundException,
+        Operation parseUnary(Op op) throws OperandNotFoundException,
             ExpectedSymbolException,
             ConstOverflowException,
             NotAnOperationException
