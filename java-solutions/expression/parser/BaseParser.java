@@ -31,16 +31,28 @@ public class BaseParser {
         return false;
     }
 
-    protected void expect(final char expected) {
+    protected boolean expect(final char expected) {
         if (!take(expected)) {
-            throw error("Expected '" + expected + "', found '" + ch + "'");
+            throw error("expected: " + ch + " found: " + ch);
         }
+        return true;
     }
 
-    protected void expect(final String value) {
+    protected <T> T expect(final char expected, final T throwBack) {
+        expect(expected);
+        return throwBack;
+    }
+
+    protected boolean expect(final String value) {
         for (final char c : value.toCharArray()) {
             expect(c);
         }
+        return true;
+    }
+
+    protected <T> T expect(final String value, final T throwBack) {
+        expect(value);
+        return throwBack;
     }
 
     protected boolean eof() {

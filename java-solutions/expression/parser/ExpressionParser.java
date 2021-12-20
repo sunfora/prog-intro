@@ -1,16 +1,15 @@
 package expression.parser;
 
 import expression.*;
-import java.math.BigInteger;
 import java.util.function.*;
 
 public class ExpressionParser implements Parser {
 
-    private static final int MIN_VALUE;
+    private final static int MIN_VALUE;
 
     static {
         int lowest = 0;
-        for (final Op op : Op.values()) {
+        for (Op op : Op.values()) {
             lowest = Math.max(lowest, op.getPriority());
         }
         MIN_VALUE = lowest;
@@ -33,67 +32,89 @@ public class ExpressionParser implements Parser {
         }
 
         public PolyExpression parse() {
-            final PolyExpression result = parseExpression();
+            PolyExpression result = parseExpression();
             if (eof()) {
                 return result;
             }
-            throw error("End of expression expected");
+            throw error("end of expression expected");
         }
 
         PolyExpression parseExpression() {
-            return parseP(MIN_VALUE);
-        }
-
-        Variable parseVariable() {
-            for (final char variable : "xyz".toCharArray()) {
-                if (take(variable)) {
-                    return new Variable(variable);
-                }
-            }
-            throw error("Not supported variable");
-        }
-
-        Operation parseUnary(final Op op) {
-            if (op.isUnary()) {
-                return op.make(parseP0());
-            }
-            throw error("Not an unary operation" + op);
-        }
-
-        Op parseSign() {
+            PolyExpression result = parseP(MIN_VALUE);
             take(' ');
-            final Op result;
-            if (take('*')) {
-                result = Op.MULTIPLY;
-            } else if (take('/')) {
-                result = Op.DIVIDE;
-            } else if (take('+')) {
-                result = Op.ADD;
-            } else if (take('-')) {
-                result = Op.SUBTRACT;
-            } else if (take('m')) {
-                if (take('i')) {
-                    expect('n');
-                    result = Op.MIN;
-                } else {
-                    expect("ax");
-                    result = Op.MAX;
-                }
-            } else if (take('t')) {
-                expect('0');
-                result = Op.T0;
-            } else if (take('l')) {
-                expect('0');
-                result = Op.L0;
+            return result;
+        }
+
+        int lower(Op op) {
+            return sign.getPriority() - 1;
+        }
+
+        void updateSign() {
+            if (sign == Op.NONE) {
+                sign = parseBinarySign();
+            }
+        }
+
+        PolyExpression parseP(int priority) {
+            PolyExpression result;
+            result = parseP0();
+            updateSign();
+            int fPos = pos();
+            Op fOp = Op.NONE;
+            while ((sign != Op.NONE) && (lower(sign) < priority)) {
+                fPos = pos();
+                fOp = sign;
+                result = sign.make(
+                    result,
+                    parseP(Util.fall(lower(sign), sign = Op.NONE))
+                );
+            }
+            return result;
+        }
+
+        PolyExpression parseP0() {
+            int fPos = pos();
+            PolyExpression result;
+            Op unary = Op.NONE;
+            take(' ');
+            if (take('(')) {
+                result = parseExpression();
+                expect(')');
             } else {
-                result = Op.NONE;
+                unary = parseUnarySign();
+                if (unary != Op.NONE && !(unary == Op.NEG && between('0', '9'))) {
+                    result = parseUnary(unary);
+                } else {
+                    if (between('x', 'z')) {
+                        result = parseVariable();
+                    } else if (between('0', '9')) {
+                        result = parseConst(unary == Op.NEG);
+                    } else {
+                        throw error("empty expression");
+                    }
+                }
             }
             take(' ');
             return result;
         }
 
-        Const parseConst(final boolean minus) {
-            final StringBuilder sb = new StringBuilder();
+        Variable parseVariable() {
+            for (char var : "xyz".toCharArray()) {
+                if (take(var)) {
+                    return new Variable(var);
+                }
+            }
+            throw error("variable not found");
+        }
+
+        Operation parseUnary(Op op) {
+            int fPos = pos();
+            return op.make(parseP0());
+        }
+
+        Const parseConst(boolean minus) {
+            StringBuilder sb = new StringBuilder();
+            Const result;
             if (minus) {
                 sb.append('-');
             }
@@ -103,82 +124,58 @@ public class ExpressionParser implements Parser {
             do {
                 sb.append(take());
             } while (between('0', '9'));
-            return new Const(new BigInteger(sb.toString()));
-        }
-
-        PolyExpression parseP(final int priority) {
-            if (priority == 0) {
-                return parseP0();
-            }
-            PolyExpression result = parseP(priority - 1);
-            while (sign.getPriority() == priority) {
-                result = sign.make(result, parseP(priority - 1));
-            }
+            result = new Const(Integer.parseInt(sb.toString()));
             return result;
         }
 
-        PolyExpression parseP0() {
-            final PolyExpression result;
-            Op unary = Op.NONE;
-            take(' ');
-            if (take('(')) {
-                result = parseExpression();
-                expect(')');
-            } else {
-                boolean minus = false;
-                if (take('-')) {
-                    minus = between('0', '9');
-                    unary = minus? unary : Op.NEG;
-                } else {
-                    unary = parseSign();
-                }
-                if (unary != Op.NONE) {
-                    result = parseUnary(unary);
-                } else {
-                    if (between('x', 'z')) {
-                        result = parseVariable();
-                    } else if (between('0', '9')) {
-                        result = parseConst(minus);
-                    } else {
-                        throw error("Not P0");
-                    }
-                }
-            }
-            take(' ');
-            sign = (unary == Op.NONE)? parseSign() :  sign;
+        Op parseBinarySign() {
+            Op result = take('+') ? Op.ADD
+                      : take('-') ? Op.SUBTRACT
+                      : take('*') ? Op.MULTIPLY
+                      : take('/') ? Op.DIVIDE
+                      : take('m') ? take('i')? expect('n', Op.MIN) : expect("ax", Op.MAX)
+                      : Op.NONE;
+            return result;
+        }
+
+        Op parseUnarySign() {
+            Op result = take('-')? Op.NEG
+                      : take('t')? expect('0', Op.T0)
+                      : take('l')? expect('0', Op.L0)
+                      : Op.NONE;
             return result;
         }
     }
 
     public static enum Op {
+        NONE     (             ),
+        NEG      (   Neg::new  ),
+        T0       (   T0::new   ),
+        L0       (   L0::new   ),
         MULTIPLY (Multiply::new),
-        DIVIDE   (Divide::new),
-        ADD      (Add::new),
+        DIVIDE   ( Divide::new ),
+        ADD      (   Add::new  ),
         SUBTRACT (Subtract::new),
-        MIN      (Min::new),
-        MAX      (Max::new),
-        NEG      (Neg::new),
-        T0       (T0::new),
-        L0       (L0::new),
-        NONE     ();
+        MIN      (   Min::new  ),
+        MAX      (   Max::new  );
 
         private final BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary;
         private final Function<PolyExpression, ? extends Operation> unary;
         private final Operation example;
-
+        
         private Op() {
             binary = null;
             unary = null;
             this.example = null;
         }
 
-        private Op(final BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary) {
+        private Op(BiFunction<PolyExpression, PolyExpression, ? extends Operation> binary) {
             this.binary = binary;
             this.unary = null;
             this.example = binary.apply(new Variable('x'), new Variable('y'));
         }
 
-        private Op(final Function<PolyExpression, ? extends Operation> unary) {
+        private Op(Function<PolyExpression, ? extends Operation> unary) {
             this.unary = unary;
             this.binary = null;
             this.example = unary.apply(new Variable('x'));
@@ -187,12 +184,12 @@ public class ExpressionParser implements Parser {
         @Override
         public String toString() {
             if (null == example) {
-                return "None";
+                return "";
             }
             return example.toString();
         }
 
-        public Operation make(final PolyExpression min1, final PolyExpression min2) {
+        public Operation make(PolyExpression min1, PolyExpression min2) {
             if (!isBinary()) {
                 throw new IllegalStateException("Not a binary operation");
             }
@@ -213,7 +210,7 @@ public class ExpressionParser implements Parser {
             return example.getOperation();
         }
 
-        public Operation make(final PolyExpression min1) {
+        public Operation make(PolyExpression min1) {
             if (!isUnary()) {
                 throw new IllegalStateException("Not an unary operation");
             }
