@@ -82,4 +82,68 @@ public class CheckedMath {
             x*y
         );
     }
+
+    public static int pow(int x, int y) throws IntOverflowException {
+        if (y < 0) {
+            throw new UndefinedAtException(
+                String.format("Negative power : %d ** %d", x, y)
+            );
+        } if (y == 0) {
+            if (x == 0) {
+                throw new UndefinedAtException("0 ** 0");
+            } else {
+                return 1;
+            }
+        }
+        if (x == 1 || x == 0) {
+            return x;
+        }
+        if (x == -1) {
+            return 1 - 2 * (y&1);
+        }
+        int result = 1;
+        int a = 1;
+        try {
+            for (int p = y; p > 0; p >>= 1) {
+                a = (a == 1)? x : mul(a, a);
+                if ((p&1) == 1) {
+                    result = mul(result, a);
+                }
+            }
+        } catch (IntOverflowException e) {
+            throw new IntOverflowException(
+                String.format("Overflow while power %d ** %d", x, y),
+                e.getOverflowed()
+            );
+        }
+        return result;
+    }
+
+    public static int log(int x, int y) {
+        if (x <= 0) {
+            throw new UndefinedAtException(
+                String.format("Negative log arg : %d // %d", x, y)
+            );
+        }
+        if (y < 2) {
+            throw new LogBaseException(
+                String.format("%d // %d", x, y)
+            );
+        }
+        int res;
+        for (res = 0; x >= y; x /= y) {
+            res++;
+        }
+        return res;
+    }
+
+    public static int abs(int x) {
+        if (x == MIN) {
+            throw new IntOverflowException(
+                String.format(OVERFLOW, "abs", uRes("abs", x, -x)),
+                -x
+            );
+        }
+        return x < 0? -x : x;
+    }
 }

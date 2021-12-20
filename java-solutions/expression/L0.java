@@ -24,6 +24,6 @@ public class L0 extends LeftUnaryOperation {
 
     @Override
     public BigInteger apply(BigInteger x) {
-        return BigInteger.valueOf(apply(x.intValue()));
+        throw new UnsupportedOperationException("l0 BigInteger");
     }
 }

@@ -26,6 +26,6 @@ public class Add extends BinaryOperation {
 
     @Override
     public int getPriority() {
-        return 2;
+        return 3;
     }
 }

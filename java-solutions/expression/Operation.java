@@ -7,6 +7,10 @@ public abstract class Operation implements PolyExpression {
     abstract public void fastToString(StringBuilder dest);
     abstract public void fastToMiniString(StringBuilder dest);
 
+    protected boolean isAssociative() {
+        return true;
+    }
+
     protected boolean leftAssociative() {
         return true;
     }

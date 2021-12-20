@@ -26,7 +26,12 @@ public class Subtract extends BinaryOperation {
 
     @Override
     public int getPriority() {
-        return 2;
+        return 3;
+    }
+
+    @Override
+    protected boolean isAssociative() {
+        return false;
     }
 
     @Override

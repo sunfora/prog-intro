@@ -9,7 +9,7 @@ public class Min extends BinaryOperation {
 
     @Override
     public int getPriority() {
-        return 3;
+        return 5;
     }
 
     @Override

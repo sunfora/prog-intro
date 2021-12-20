@@ -23,6 +23,7 @@ public class StringSource implements CharSource {
 
     @Override
     public int pos() {
+//        System.err.println('`' + data.substring(0, pos) + "`");
         return pos;
     }
 }

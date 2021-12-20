@@ -20,10 +20,14 @@ public abstract class BinaryOperation extends Operation {
         left = -min1.getPriority() < -getPriority();
         right = -getPriority() > -min2.getPriority();
 
-        if (min2 instanceof Operation) {
-            Operation op2 = (Operation) min2;
+        if (min2 instanceof BinaryOperation) {
+            Operation op2 = (BinaryOperation) min2;
             if (op2.getPriority() == getPriority()) {
-                right = !rightAssociative() || !op2.leftAssociative();
+                if (op2.getClass() == getClass()) {
+                    right = !isAssociative();
+                } else {
+                    right = !rightAssociative() || (!op2.leftAssociative());
+                }
             }
         }
     }

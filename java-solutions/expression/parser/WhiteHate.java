@@ -35,7 +35,7 @@ public class WhiteHate implements CharSource {
     }
 
     @Override
-    public int pos() {
-        return source.pos();
-    }
+	public int pos() {
+		return source.pos();
+	}
 }

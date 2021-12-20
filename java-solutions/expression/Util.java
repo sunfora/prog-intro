@@ -35,11 +35,32 @@ public class Util {
         return a;
     }
 
-    public static int fall(int a, Object... b) {
+    public static int fall(int a, Object b) {
         return a;
     }
 
-    public static char fall(char a, Object... b) {
+    public static char fall(char a, Object b) {
         return a;
+    }
+
+    public static boolean isWord(String word) {
+        if (word == null) {
+            return false;
+        }
+        for (char c : word.toCharArray()) {
+            if (!isWord(c)) {
+                return false;
+            }
+        }
+        return word.length() > 0;
+    }
+
+    public static boolean isWord(char c) {
+        c = Character.toLowerCase(c);
+        return between(c, '0', '9') || between(c, 'a', 'z');
+    }
+
+    public static boolean between(final char c, final char from, final char to) {
+        return from <= c && c <= to;
     }
 }

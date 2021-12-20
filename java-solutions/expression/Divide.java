@@ -26,7 +26,12 @@ public class Divide extends BinaryOperation {
 
     @Override
     public int getPriority() {
-        return 1;
+        return 2;
+    }
+
+    @Override
+    public boolean isAssociative() {
+        return false;
     }
 
     @Override

@@ -24,6 +24,6 @@ public class T0 extends LeftUnaryOperation {
 
     @Override
     public BigInteger apply(BigInteger x) {
-        return BigInteger.valueOf(x.getLowestSetBit());
+        throw new UnsupportedOperationException("t0 BigInteger");
     }
 }
