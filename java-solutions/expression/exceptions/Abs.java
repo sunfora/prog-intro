@@ -4,15 +4,15 @@ import expression.*;
 import java.math.BigInteger;
 
 public class Abs extends LeftUnaryOperation {
-    public Abs(PolyExpression expr) {
+    public Abs(final PolyExpression expr) {
         super(expr);
     }
 
-    public int apply(int x) {
+    public int apply(final int x) {
         return CheckedMath.abs(x);
     }
 
-    public BigInteger apply(BigInteger x) {
+    public BigInteger apply(final BigInteger x) {
         return x.abs();
     }
 

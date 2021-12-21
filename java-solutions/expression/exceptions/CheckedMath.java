@@ -13,7 +13,7 @@ public class CheckedMath {
     }
 
     private static String uRes(String sign, int x, int r) {
-        return String.format(U_RES, sign, x, r);
+        return String.format("%s %d", sign, x, r);
     }
 
     public static boolean signOp(int x, int y) {

@@ -9,6 +9,4 @@ public class ParseException extends Exception {
         super(message);
     }
 
-    public ParseException() {
-    }
 }
