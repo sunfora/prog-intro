@@ -1,14 +1,26 @@
 package expression.exceptions;
 
 public class ParseException extends Exception {
-    public ParseException(String message, Throwable cause) {
-        super(message, cause);
+    private final int offset;
+    private final String raw;
+
+    public ParseException(int offset, String message, Throwable cause) {
+        super(offset + " : " + message, cause);
+        this.offset = offset;
+        this.raw = message;
     }
 
-    public ParseException(String message) {
-        super(message);
+    public ParseException(int offset, String message) {
+        super(offset + " : " + message);
+        this.offset = offset;
+        this.raw = message;
     }
 
-    public ParseException() {
+    public int getOffset() {
+        return offset;
+    }
+
+    public String getRawMessage() {
+        return raw;
     }
 }

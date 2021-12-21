@@ -6,7 +6,7 @@ public class CheckedMath {
     private static final int MIN = Integer.MIN_VALUE;
     private static final String OVERFLOW = "%s int overflow %s";
     private static final String B_RES = "%d %s %d : %d";
-    private static final String U_RES = "%s %d";
+    private static final String U_RES = "%s %d : %d";
 
     private static String bRes(String sign, int x, int y, int r) {
         return String.format(B_RES, x, sign, y, r);
@@ -24,7 +24,7 @@ public class CheckedMath {
         return (x ^ y) >= 0;
     }
 
-    public static int add(int x, int y) throws IntOverflowException {
+    public static int add(int x, int y) {
         if (signOp(x, y) || signEq(x + y, y)) {
             return x + y;
         }
@@ -34,7 +34,7 @@ public class CheckedMath {
         );
     }
 
-    public static int sub(int x, int y) throws IntOverflowException {
+    public static int sub(int x, int y) {
         if (signEq(x, y) || signEq(x - y, x)) {
             return x - y;
         }
@@ -44,7 +44,7 @@ public class CheckedMath {
         );
     }
 
-    public static int neg(int x) throws IntOverflowException {
+    public static int neg(int x) {
         switch (x) {
             case MIN:
                 throw new IntOverflowException(
@@ -55,10 +55,10 @@ public class CheckedMath {
         return -x;
     }
 
-    public static int div(int x, int y) throws DivisionByZeroException, IntOverflowException {
+    public static int div(int x, int y) {
         switch (y) {
             case 0:
-                throw new DivisionByZeroException(x + " / " + y);
+                throw new UndefinedAtException("Division by zero " + x + " / " + y);
             case -1:
                 if (x == MIN) {
                     throw new IntOverflowException(
@@ -70,7 +70,7 @@ public class CheckedMath {
         return x/y;
     }
 
-    public static int mul(int x, int y) throws IntOverflowException {
+    public static int mul(int x, int y) {
         if (x == 0 || y == 0) {
             return 0;
         }
@@ -126,8 +126,8 @@ public class CheckedMath {
             );
         }
         if (y < 2) {
-            throw new LogBaseException(
-                String.format("%d // %d", x, y)
+            throw new UndefinedAtException(
+                String.format("Log base %d // %d", x, y)
             );
         }
         int res;

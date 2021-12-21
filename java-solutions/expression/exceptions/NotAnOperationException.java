@@ -1,6 +1,6 @@
 package expression.exceptions;
 
-public class NotAnOperationException extends OffsetParseException {
+public class NotAnOperationException extends ParseException {
     private final String sign;
 
     public NotAnOperationException(int pos, String sign) {

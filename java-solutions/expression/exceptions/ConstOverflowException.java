@@ -1,6 +1,6 @@
 package expression.exceptions;
 
-public class ConstOverflowException extends OffsetParseException {
+public class ConstOverflowException extends ParseException {
     public ConstOverflowException(int pos, String message, Throwable cause) {
         super(pos, message, cause);
     }

@@ -8,7 +8,7 @@ import java.util.function.*;
 
 public class ExpressionParser implements Parser {
 
-    private final static int MIN_VALUE;
+    private static final int MIN_VALUE;
 
     static {
         int lowest = 0;
@@ -18,24 +18,12 @@ public class ExpressionParser implements Parser {
         MIN_VALUE = lowest;
     }
 
-    public PolyExpression parse(final String data) throws
-        ExpectedSymbolException,
-        ConstOverflowException,
-        OperandNotFoundException,
-        EndExpectedException,
-        NotAnOperationException
-    {
+    public PolyExpression parse(final String data) throws ParseException {
         //System.err.println("`" + data + "`");
         return parse(new WhiteHate(new StringSource(data)));
     }
 
-    private PolyExpression parse(final CharSource source) throws
-        ExpectedSymbolException,
-        ConstOverflowException,
-        EndExpectedException,
-        OperandNotFoundException,
-        NotAnOperationException
-    {
+    private PolyExpression parse(final CharSource source) throws ParseException {
         return new ExpressionMaker(source).parse();
     }
 
@@ -47,29 +35,15 @@ public class ExpressionParser implements Parser {
             super(source);
         }
 
-        public PolyExpression parse() throws EndExpectedException,
-            ExpectedSymbolException,
-            ConstOverflowException,
-            OperandNotFoundException,
-            NotAnOperationException
-        {
+        public PolyExpression parse() throws ExpectedSymbolException, ParseException {
             PolyExpression result = parseExpression();
             if (eof()) {
                 return result;
             }
-            if (take(')')) {
-                throw new ExpectedSymbolException(
-                    pos(), ' ', ')', "missing opening bracket"
-                );
-            }
-            throw new EndExpectedException(pos(), " end of expression expected");
+            throw new ExpectedSymbolException(pos(), '\0', ch);
         }
 
-        PolyExpression parseExpression() throws OperandNotFoundException,
-            ExpectedSymbolException,
-            ConstOverflowException,
-            NotAnOperationException
-        {
+        PolyExpression parseExpression() throws OperandNotFoundException, ParseException {
             PolyExpression result = parseP(MIN_VALUE);
             if (sign != Op.NONE) {
                 throw rightOperandMissing(pos(), sign);
@@ -82,24 +56,20 @@ public class ExpressionParser implements Parser {
             return sign.getPriority() - 1;
         }
 
-        void updateSign() throws ExpectedSymbolException, NotAnOperationException {
+        void updateSign() throws ParseException {
             if (sign == Op.NONE) {
                 sign = parseBinarySign();
             }
         }
 
-        PolyExpression parseP(int priority) throws OperandNotFoundException,
-            ExpectedSymbolException,
-            ConstOverflowException,
-            NotAnOperationException
-        {
+        PolyExpression parseP(int priority) throws OperandNotFoundException, ParseException {
             PolyExpression result;
             result = parseP0();
             updateSign();
             int fPos = pos();
             Op fOp = Op.NONE;
             try {
-                while ((sign != Op.NONE) && (lower(sign) < priority)) {
+                while (sign != Op.NONE && lower(sign) < priority) {
                     fPos = pos();
                     fOp = sign;
                     result = sign.make(
@@ -113,11 +83,7 @@ public class ExpressionParser implements Parser {
             return result;
         }
 
-        PolyExpression parseP0() throws OperandNotFoundException,
-            ExpectedSymbolException,
-            ConstOverflowException,
-            NotAnOperationException
-        {
+        PolyExpression parseP0() throws ParseException {
             int fPos = pos();
             PolyExpression result;
             Op unary = Op.NONE;
@@ -129,44 +95,39 @@ public class ExpressionParser implements Parser {
                 unary = parseUnarySign();
                 if (unary != Op.NONE && !(unary == Op.NEG && between('0', '9'))) {
                     result = parseUnary(unary);
+                } else if (between('x', 'z')) {
+                    result = parseVariable();
+                } else if (between('0', '9')) {
+                    result = parseConst(unary == Op.NEG);
+                } else if ((sign = parseBinarySign()) != Op.NONE) {
+                    throw leftOperandMissing(fPos, sign);
                 } else {
-                    if (between('x', 'z')) {
-                        result = parseVariable();
-                    } else if (between('0', '9')) {
-                        result = parseConst(unary == Op.NEG);
-                    } else {
-                        if ((sign = parseBinarySign()) != Op.NONE) {
-                            throw leftOperandMissing(fPos, sign);
-                        } else {
-                            throw new OperandNotFoundException(
-                                fPos, "empty expression"
-                            );
-                        }
-                    }
+                    
+                    throw new OperandNotFoundException(
+                        fPos, "empty expression"
+                    );
                 }
             }
             take(' ');
+            
             return result;
         }
 
         Variable parseVariable() throws OperandNotFoundException {
-            for (char var : "xyz".toCharArray()) {
-                if (take(var)) {
-                    return new Variable(var);
+            for (char variable : "xyz".toCharArray()) {
+                if (take(variable)) {
+                    return new Variable(variable);
                 }
             }
             throw new OperandNotFoundException(pos(), "variable not found");
         }
 
-        Operation parseUnary(Op op) throws OperandNotFoundException,
-            ExpectedSymbolException,
-            ConstOverflowException,
-            NotAnOperationException
-        {
+        Operation parseUnary(Op op) throws ParseException {
             int fPos = pos();
             try {
                 return op.make(parseP0());
             } catch (OperandNotFoundException e) {
+                
                 throw rightOperandMissing(fPos, op);
             }
         }
@@ -186,6 +147,7 @@ public class ExpressionParser implements Parser {
             try {
                 result = new Const(Integer.parseInt(sb.toString()));
             } catch (NumberFormatException e) {
+                
                 throw new ConstOverflowException(
                     pos(), "expected int, found : " + sb, e
                 );
@@ -243,13 +205,13 @@ public class ExpressionParser implements Parser {
 
     private static OperandNotFoundException rightOperandMissing(int pos, Op op) {
         return new OperandNotFoundException(
-            pos, op + " right operand missing"
+            pos, op.getOperation() + " right operand missing"
         );
     }
 
     private static OperandNotFoundException leftOperandMissing(int pos, Op op) {
         return new OperandNotFoundException(
-            pos, op + " left operand missing"
+            pos, op.getOperation() + " left operand missing"
         );
     }
 

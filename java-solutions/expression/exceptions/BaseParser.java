@@ -86,12 +86,12 @@ public class BaseParser {
         return take(END);
     }
 
-    protected OffsetParseException error(final String message) {
-        return new OffsetParseException(pos(), message);
+    protected ParseException error(final String message) {
+        return new ParseException(pos(), message);
     }
 
-    protected OffsetParseException error(final String message, Throwable cause) {
-        return new OffsetParseException(pos(), message, cause);
+    protected ParseException error(final String message, Throwable cause) {
+        return new ParseException(pos(), message, cause);
     }
 
     protected int pos() {
