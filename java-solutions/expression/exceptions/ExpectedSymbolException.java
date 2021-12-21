@@ -1,6 +1,6 @@
 package expression.exceptions;
 
-public class ExpectedSymbolException extends OffsetParseException {
+public class ExpectedSymbolException extends ParseException {
     private final char expected;
     private final char found;
 
