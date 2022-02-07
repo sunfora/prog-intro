@@ -28,8 +28,8 @@ public class ExpressionParser implements Parser {
     }
 
     private static class ExpressionMaker extends BaseParser {
-        PolyExpression expr;
-        Op sign = Op.NONE;
+        Op sign = Op.NONE;   // last read operation
+        int fPos;            // position of parse fail
 
         public ExpressionMaker(final CharSource source) {
             super(source);
@@ -43,48 +43,37 @@ public class ExpressionParser implements Parser {
             throw new ExpectedSymbolException(pos(), '\0', ch);
         }
 
-        PolyExpression parseExpression() throws OperandNotFoundException, ParseException {
-            PolyExpression result = parseP(MIN_VALUE);
-            if (sign != Op.NONE) {
-                throw rightOperandMissing(pos(), sign);
-            }
-            take(' ');
-            return result;
+        PolyExpression parseExpression() throws ParseException {
+            return parseP(Op.NONE.getPriority(), true);
         }
 
-        int lower(Op op) {
-            return sign.getPriority() - 1;
-        }
-
-        void updateSign() throws ParseException {
-            if (sign == Op.NONE) {
-                sign = parseBinarySign();
-            }
-        }
-
-        PolyExpression parseP(int priority) throws OperandNotFoundException, ParseException {
+        // Constructs result while sign priority and priority are equal
+        // neq inverts this behaviour
+        PolyExpression parseP(int priority, boolean neq) throws ParseException { /*FOLD01*/
+            fPos = pos();
             PolyExpression result;
-            result = parseP0();
-            updateSign();
-            int fPos = pos();
-            Op fOp = Op.NONE;
+            if (priority <= 0) {
+                result = parseP0();
+                sign = parseBinarySign();
+            } else {
+                result = parseP(priority - 1);
+            }
             try {
-                while (sign != Op.NONE && lower(sign) < priority) {
-                    fPos = pos();
-                    fOp = sign;
-                    result = sign.make(
-                        result,
-                        parseP(Util.fall(lower(sign), sign = Op.NONE))
-                    );
+                while ((sign.getPriority() == priority) ^ neq) {
+                    result = sign.make(result, parseP(sign.getPriority() - 1));
                 }
             } catch (OperandNotFoundException e) {
-                throw rightOperandMissing(fPos, fOp);
+                throw rightOperandMissing(fPos);
             }
             return result;
+        } /*FOLD01*/
+
+        PolyExpression parseP(int priority) throws ParseException {
+            return parseP(priority, false);
         }
 
-        PolyExpression parseP0() throws ParseException {
-            int fPos = pos();
+        PolyExpression parseP0() throws ParseException { /*FOLD01*/
+            fPos = pos();
             PolyExpression result;
             Op unary = Op.NONE;
             take(' ');
@@ -100,18 +89,16 @@ public class ExpressionParser implements Parser {
                 } else if (between('0', '9')) {
                     result = parseConst(unary == Op.NEG);
                 } else if ((sign = parseBinarySign()) != Op.NONE) {
-                    throw leftOperandMissing(fPos, sign);
+                    throw leftOperandMissing(fPos);
                 } else {
-                    
                     throw new OperandNotFoundException(
                         fPos, "empty expression"
                     );
                 }
             }
             take(' ');
-            
             return result;
-        }
+        } /*FOLD01*/
 
         Variable parseVariable() throws OperandNotFoundException {
             for (char variable : "xyz".toCharArray()) {
@@ -123,16 +110,15 @@ public class ExpressionParser implements Parser {
         }
 
         Operation parseUnary(Op op) throws ParseException {
-            int fPos = pos();
+            fPos = pos();
             try {
                 return op.make(parseP0());
             } catch (OperandNotFoundException e) {
-                
-                throw rightOperandMissing(fPos, op);
+                throw rightOperandMissing(fPos);
             }
         }
 
-        Const parseConst(boolean minus) throws ConstOverflowException {
+        Const parseConst(boolean minus) throws ConstOverflowException { /*fold01*/
             StringBuilder sb = new StringBuilder();
             Const result;
             if (minus) {
@@ -153,65 +139,61 @@ public class ExpressionParser implements Parser {
                 );
             }
             return result;
+        } /*FOLD01*/
+
+        Op parseBinarySign() throws ParseException {
+            return ensureSignWord(
+                () -> take('<') ? expect('<', Op.L_SHIFT)
+                    : take('+') ? Op.ADD
+                    : take('-') ? Op.SUBTRACT
+                    : take('*') ? take('*')? Op.POW : Op.MULTIPLY
+                    : take('/') ? take('/')? Op.LOG : Op.DIVIDE
+                    : take('>') ? expect('>') && take('>')? Op.TR_SHIFT : Op.R_SHIFT
+                    : take('m') ? take('i')? expect('n', Op.MIN) : expect("ax", Op.MAX)
+                    : Op.NONE
+            );
         }
 
-        Op parseBinarySign() throws ExpectedSymbolException, NotAnOperationException {
+        Op parseUnarySign() throws ParseException {
+            return ensureSignWord(
+                () -> take('-')? Op.NEG
+                    : take('t')? expect('0', Op.T0)
+                    : take('l')? expect('0', Op.L0)
+                    : take('a')? expect("bs", Op.ABS)
+                    : Op.NONE
+            );
+        }
+
+        Op ensureSignWord(ParseExceptionSupplier<Op> parser) throws ParseException {
             StringBuilder word = new StringBuilder()
                 .append(Util.isWord(back)? back : "");
 
-            Op result = take('<') ? expect('<', Op.L_SHIFT)
-                      : take('+') ? Op.ADD
-                      : take('-') ? Op.SUBTRACT
-                      : take('*') ? take('*')? Op.POW : Op.MULTIPLY
-                      : take('/') ? take('/')? Op.LOG : Op.DIVIDE
-                      : take('>') ? expect('>') && take('>')? Op.TR_SHIFT : Op.R_SHIFT
-                      : take('m') ? take('i')? expect('n', Op.MIN) : expect("ax", Op.MAX)
-                      : Op.NONE;
+            Op result = parser.get();
 
             if (result.isWord()) {
-                ensureSignWord(word, result);
+                boolean fail = word.length() > 0 && result.isWord();
+                word.append(result.getOperation());
+                int sz = word.length();
+                for (; Util.isWord(ch); word.append(take()));
+                if (fail || sz < word.length()) {
+                    throw new NotAnOperationException(
+                        pos(), word.toString()
+                    );
+                }
             }
             return result;
-        }
-
-        Op parseUnarySign() throws ExpectedSymbolException, NotAnOperationException {
-            StringBuilder word = new StringBuilder()
-                .append(Util.isWord(back)? back : "");
-
-            Op result = take('-')? Op.NEG
-                      : take('t')? expect('0', Op.T0)
-                      : take('l')? expect('0', Op.L0)
-                      : take('a')? expect("bs", Op.ABS)
-                      : Op.NONE;
-
-            if (result.isWord()) {
-                ensureSignWord(word, result);
-            }
-            return result;
-        }
-
-        void ensureSignWord(StringBuilder word, Op result) throws NotAnOperationException {
-            boolean fail = word.length() > 0 && result.isWord();
-            word.append(result.getOperation());
-            int sz = word.length();
-            for (; Util.isWord(ch); word.append(take()));
-            if (fail || sz < word.length()) {
-                throw new NotAnOperationException(
-                    pos(), word.toString()
-                );
-            }
         }
     }
 
-    private static OperandNotFoundException rightOperandMissing(int pos, Op op) {
+    private static OperandNotFoundException rightOperandMissing(int pos) {
         return new OperandNotFoundException(
-            pos, op.getOperation() + " right operand missing"
+            pos, "right operand missing"
         );
     }
 
-    private static OperandNotFoundException leftOperandMissing(int pos, Op op) {
+    private static OperandNotFoundException leftOperandMissing(int pos) {
         return new OperandNotFoundException(
-            pos, op.getOperation() + " left operand missing"
+            pos, "left operand missing"
         );
     }
 
@@ -307,4 +289,8 @@ public class ExpressionParser implements Parser {
             return word;
         }
     }
+}
+
+interface ParseExceptionSupplier<T> {
+    T get() throws ParseException;
 }
